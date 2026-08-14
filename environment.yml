@@ -1,0 +1,22 @@
+# Project WAKE 実行環境 (Phase 1 冒頭裁定・裁定1 の承認条件によりバージョン固定)
+# 再現性要件 (憲法第11条) の一部。構築: conda env create -f environment.yml
+# 構築実測: 2026-08-14, M4 iMac (arm64) / miniforge3
+name: wake
+channels:
+  - conda-forge
+dependencies:
+  - python=3.12.13
+  - numpy=2.5.2
+  - scipy=1.18.0
+  - astropy=8.0.1
+  # 注: pip 版 galpy は conda 版 numpy との OpenMP 競合で C 拡張が自動無効化される
+  # (galpy 起動時警告)。galpy は照合・McMillan17 評価のみに使うため実害なし。
+  # Phase 2 で McMillan17 が律速になる場合は conda-forge 版への切替 or 表引き化。
+  - pip
+  - pip:
+      - galpy==1.12.0
+      - healpy==1.20.0
+      - gaiaunlimited==0.3.3
+      - astroquery==0.4.11
+      - pandas==3.0.5
+      - matplotlib==3.11.1
