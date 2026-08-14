@@ -13,9 +13,10 @@ from .potentials import Potential, KMS
 from .integrate import sun_state
 
 
-def helio_galactic_to_engine(potential: Potential, pos_pc, vel_uvw_kms):
-    """(pos_pc, UVW) — wake_data.icrs 出力 — をエンジン状態 (kpc, kpc/Myr) へ。"""
-    sp, sv = sun_state(potential)
+def helio_galactic_to_engine(potential: Potential, pos_pc, vel_uvw_kms, sun=None):
+    """(pos_pc, UVW) — wake_data.icrs 出力 — をエンジン状態 (kpc, kpc/Myr) へ。
+    sun: (pos3, vel3) の明示指定 (太陽パラメータの参照論文合わせ)。None で既定。"""
+    sp, sv = sun_state(potential) if sun is None else sun
     pos = np.atleast_2d(np.asarray(pos_pc, dtype=float)) / 1000.0
     vel = np.atleast_2d(np.asarray(vel_uvw_kms, dtype=float))
     pos_e = np.stack([sp[0] - pos[:, 0], sp[1] + pos[:, 1], sp[2] + pos[:, 2]],

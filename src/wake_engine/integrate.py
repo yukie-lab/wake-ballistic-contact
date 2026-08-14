@@ -35,10 +35,12 @@ def sun_state(potential: Potential):
     return pos, vel
 
 
-def propagate(potential: Potential, pos, vel, t_end: float, dt: float) -> Encounters:
+def propagate(potential: Potential, pos, vel, t_end: float, dt: float,
+              sun=None) -> Encounters:
     """星々 (pos, vel) と太陽を t=0 → t_end まで積分し、太陽への最接近を返す。
-    t_end < 0 で過去方向。dt は正の刻み幅。"""
-    sp, sv = sun_state(potential)
+    t_end < 0 で過去方向。dt は正の刻み幅。
+    sun: (pos3, vel3) の明示指定 (例: BJ+18 再現の太陽パラメータ)。None で既定。"""
+    sp, sv = sun_state(potential) if sun is None else sun
     P = np.vstack([sp[None, :], np.asarray(pos, dtype=float)])
     V = np.vstack([sv[None, :], np.asarray(vel, dtype=float)])
     n = P.shape[0] - 1
@@ -90,10 +92,11 @@ def propagate(potential: Potential, pos, vel, t_end: float, dt: float) -> Encoun
     return Encounters(t_min=t_min, d_min=d_min, at_edge=at_edge)
 
 
-def closest_approach(potential: Potential, pos, vel, window: float, dt: float) -> Encounters:
+def closest_approach(potential: Potential, pos, vel, window: float, dt: float,
+                     sun=None) -> Encounters:
     """±window の両方向を積分し、星ごとに近い方を採用。"""
-    fw = propagate(potential, pos, vel, +window, dt)
-    bw = propagate(potential, pos, vel, -window, dt)
+    fw = propagate(potential, pos, vel, +window, dt, sun=sun)
+    bw = propagate(potential, pos, vel, -window, dt, sun=sun)
     use_bw = bw.d_min < fw.d_min
     return Encounters(
         t_min=np.where(use_bw, bw.t_min, fw.t_min),
