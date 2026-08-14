@@ -89,11 +89,61 @@ class DummyCatalogProvider(CatalogProvider):
         )
 
 
-class GaiaDR3Provider(CatalogProvider):
-    """本番 DR3。Phase 1 以降で実装 (ADQL / ローカル parquet)。"""
+class GaiaDR2FileProvider(CatalogProvider):
+    """Gaia DR2 の RV 保有星 (G3-3 の同一入力: BJ+18 再現用)。
+
+    scripts/fetch_dr2_rv.py が保存した parquet 群をスキーマ v1 に写像する。
+    - ra/dec_error: DR2 位置誤差は mas 級で接近パラメータへの寄与が ~10⁻⁵ pc の
+      ため誤差伝播では 0 とする (BJ18 は 5×5 全共分散だが位置誤差の寄与は無視可能。
+      G3-3 報告に近似として明記)
+    - ruwe: DR2 本体に列がない (別テーブル) → 省略 (bit1 検疫は G3-3 では不適用)
+    - ref_epoch 2015.5
+    """
+
+    def __init__(self, data_dir):
+        self.data_dir = data_dir
 
     def load(self) -> StarCatalog:
-        raise NotImplementedError("Phase 1 で実装")
+        import glob
+        import pandas as pd
+        files = sorted(glob.glob(str(self.data_dir) + "/dr2_rv_*.parquet"))
+        if not files:
+            raise FileNotFoundError(f"DR2 parquet がない: {self.data_dir}")
+        df = pd.concat([pd.read_parquet(f) for f in files], ignore_index=True)
+        n = len(df)
+        data = {
+            "source_id": df["source_id"].to_numpy(np.int64),
+            "ra": df["ra"].to_numpy(float),
+            "dec": df["dec"].to_numpy(float),
+            "parallax": df["parallax"].to_numpy(float),
+            "pmra": df["pmra"].to_numpy(float),
+            "pmdec": df["pmdec"].to_numpy(float),
+            "radial_velocity": df["radial_velocity"].to_numpy(float),
+            "ra_error": np.zeros(n),
+            "dec_error": np.zeros(n),
+            "parallax_error": df["parallax_error"].to_numpy(float),
+            "pmra_error": df["pmra_error"].to_numpy(float),
+            "pmdec_error": df["pmdec_error"].to_numpy(float),
+            "rv_error": df["radial_velocity_error"].to_numpy(float),
+            "corr_parallax_pmra": df["parallax_pmra_corr"].to_numpy(float),
+            "corr_parallax_pmdec": df["parallax_pmdec_corr"].to_numpy(float),
+            "corr_pmra_pmdec": df["pmra_pmdec_corr"].to_numpy(float),
+            "phot_g_mean_mag": df["phot_g_mean_mag"].to_numpy(float),
+            "bp_rp": np.full(n, np.nan),
+            "rv_provenance": np.zeros(n, dtype=np.int8),
+            "rvs_teff_flag": np.full(n, -1, dtype=np.int8),
+            "quarantine_flags": np.zeros(n, dtype=np.int16),
+            "s_completeness": np.full(n, np.nan),
+        }
+        return StarCatalog(data=data, release="GaiaDR2-RV", ref_epoch=2015.5,
+                           meta={"n_files": len(files)})
+
+
+class GaiaDR3Provider(CatalogProvider):
+    """本番 DR3。Phase 2 で実装 (ADQL / ローカル parquet)。"""
+
+    def load(self) -> StarCatalog:
+        raise NotImplementedError("Phase 2 で実装")
 
 
 class GaiaDR4Provider(CatalogProvider):
