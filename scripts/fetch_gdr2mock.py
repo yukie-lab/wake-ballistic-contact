@@ -16,12 +16,7 @@ OUT = pathlib.Path(__file__).resolve().parents[1] / "data" / "raw"
 OUT.mkdir(parents=True, exist_ok=True)
 tap = TapPlus(url="https://dc.g-vo.org/tap")
 
-# 件数照合 (公刊 4.4M) は q1 と同時に async で実施
-jobc = tap.launch_job_async("SELECT count(*) AS n FROM gdr2mock.main "
-                            "WHERE phot_g_mean_mag <= 12.5 "
-                            "AND teff_val > 3550 AND teff_val < 6900",
-                            background=False)
-print("mock 観測側母集団:", jobc.get_results()["n"][0], "(公刊 4.4M)", flush=True)
+# 件数照合クエリは全表スキャンが重いため省略 (q1 の行数が実質的な照合になる)
 
 LMA = ("(1000*4.74047*sqrt(pmra*pmra+pmdec*pmdec)/power(parallax,2)) / "
        "sqrt((pmra*pmra+pmdec*pmdec)*power(4.74047/parallax,2) "

@@ -6,20 +6,30 @@
   ~10⁻³ km/s 級であり無視できる (含めても結果は不変)。
   個別ホライズン t_h(i) = d_threshold / σ_v(i)
 
-rv_error 分布は DR3 近似の合成分布 (対数正規, 中央値 1.3 km/s, σ_ln=0.8)。
-【仮定であることに注意】最終測定は Phase 1 で実 DR3 ヒストグラムに差し替える。
+rv_error は【実 DR3 分布】(gaiadr3.gaia_source の random_index 一様サンプル
+約100万星、data/raw/dr3_rv_error_sample.parquet — 裁定3の差替条件を充足)。
+サンプルが無い環境では合成分布 (中央値1.3 km/s) にフォールバックし警告する。
 """
+
+import pathlib
 
 import numpy as np
 
 PC_PER_MYR = 1.02271
 
-rng = np.random.default_rng(2)
-n = 200_000
-rv_error = rng.lognormal(np.log(1.3), 0.8, n)      # km/s (合成・要差替)
+_sample = pathlib.Path(__file__).resolve().parents[1] / "data" / "raw" / "dr3_rv_error_sample.parquet"
+if _sample.exists():
+    import pandas as pd
+    rv_error = pd.read_parquet(_sample)["radial_velocity_error"].to_numpy(float)
+    rv_error = rv_error[np.isfinite(rv_error)]
+    print(f"実 DR3 分布を使用 ({len(rv_error):,} 星)")
+else:
+    print("警告: 実 DR3 サンプルなし — 合成分布にフォールバック")
+    rng = np.random.default_rng(2)
+    rv_error = rng.lognormal(np.log(1.3), 0.8, 200_000)
 sigma_v = rv_error * PC_PER_MYR                     # pc/Myr
 
-print("rv_error 合成分布: 中央値 %.2f km/s / 10%%点 %.2f / 90%%点 %.2f" % (
+print("rv_error 分布: 中央値 %.2f km/s / 10%%点 %.2f / 90%%点 %.2f" % (
     np.median(rv_error), *np.percentile(rv_error, [10, 90])))
 print()
 print("d_threshold ごとの個別ホライズン t_h = d_th/σ_v の分布と、")
