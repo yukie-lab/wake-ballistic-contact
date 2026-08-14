@@ -95,17 +95,17 @@ def main():
     verdicts.append(("G3-1 緩和 (Mamajek15系)", ok,
                      f"t {r['t_med'] * 1e3:.1f} kyr, d {r['d_med']:.3f} pc"))
 
-    for label, ci_t, ci_d in [
-        (INP.GJ710_BB22["label"], (1.298, 1.350), (0.048, 0.056)),   # BB22 ±2σ / dlFM22 CI90
-        (INP.GJ710_BJ22["label"], (1.257, 1.334), (0.0595, 0.0678)), # BJ22 CI90
-        (INP.GJ710_FP26["label"], (1.3402, 1.3490), (0.0575, 0.0667)),  # FP26 ±2σ
-    ]:
+    # G3-2 厳格帯 = dlFM22 系 (裁定ログ#5 で基準系再指定)。同一入力 = BB22 入力セット
+    r = results[("G3-2", INP.GJ710_BB22["label"], "DC95")]
+    ok_t = in_band(r["t_med"], (1.26, 1.33))
+    ok_d = in_band(r["d_med"], (0.048, 0.056))
+    verdicts.append(("G3-2 厳格 (dlFM22系 — 裁定ログ#5)", ok_t and ok_d,
+                     f"t {r['t_med']:.3f} Myr∈[1.26,1.33]={ok_t}, "
+                     f"d {r['d_med']:.4f} pc∈[0.048,0.056]={ok_d}"))
+    # BJ22/FP26 は基準系外 (公刊分裂は Phase 2 検討事項) — 緩和帯のみ判定
+    for label in [INP.GJ710_BB22["label"], INP.GJ710_BJ22["label"],
+                  INP.GJ710_FP26["label"]]:
         r = results[("G3-2", label, "DC95")]
-        ok_t = in_band(r["t_med"], ci_t) and in_band(r["t_med"], (1.27, 1.38))
-        ok_d = in_band(r["d_med"], ci_d)
-        verdicts.append((f"G3-2 厳格 ({label.split(' ')[0]})", ok_t and ok_d,
-                         f"t {r['t_med']:.3f} Myr∈{ci_t}={ok_t}, "
-                         f"d {r['d_med']:.4f} pc∈{ci_d}={ok_d}"))
         ok_loose = (in_band(r["t_med"], (1.24, 1.40))
                     and in_band(r["d_med"], (0.045, 0.070)))
         verdicts.append((f"G3-2 緩和 ({label.split(' ')[0]})", ok_loose,

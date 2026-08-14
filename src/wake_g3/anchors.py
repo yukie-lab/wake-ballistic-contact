@@ -15,6 +15,7 @@ G3-6 (役割分界): G3 は実装検証。合格帯の事後拡大による救�
 """
 
 RULING_REF = "Phase1冒頭裁定 裁定2 (2026-08-14, 裁定ログ#4)"
+RULING_REF_G3INC = "G3インシデント裁定 (2026-08-14, 裁定ログ#5)"
 
 from dataclasses import dataclass, field
 
@@ -39,8 +40,8 @@ G3_ANCHORS = [
         name="ショルツ星 (WISE J072003.20-084651.2) 過去接近",
         test_design="固定入力再現 (憲法 1.1 G3-1: 対象星は RVS 6D サンプル外)",
         reference={
-            "DR3系: t_ph": "-79.9 kyr (CI90 -81.1〜-78.6) [dlFM 2022, RNAAS ac842b]",
-            "DR3系: d_ph": "0.330 pc (CI90 0.317-0.345) [同上]",
+            "dlFM22系 (Dupuy+2019 入力): t_ph": "-79.9 kyr (CI90 -81.1〜-78.6) [RNAAS 6,152 ac842b]",
+            "dlFM22系: d_ph": "0.330 pc (CI90 0.317-0.345) [同上]",
             "Mamajek15: t_ph": "-70 (+15/-10) kyr [arXiv:1502.04655]",
             "Mamajek15: d_ph": "0.25 (+0.11/-0.07) pc [同上]",
         },
@@ -48,11 +49,13 @@ G3_ANCHORS = [
                          "基準": "DR3 入力で固定 (裁定記録第三部2)"},
         proposed_loose={"t_ph_kyr": (-85, -60), "d_ph_pc": (0.18, 0.36)},
         strict_band={"t_ph_kyr": (-82, -78), "d_ph_pc": (0.31, 0.35),
-                     "基準": "DR3 系入力で固定", "ruling": RULING_REF},
+                     "基準": "dlFM22 (Dupuy+2019 入力) 系で固定 — ラベル訂正は裁定ログ#5",
+                     "ruling": RULING_REF},
         loose_band={"t_ph_kyr": (-85, -60), "d_ph_pc": (0.18, 0.36),
                     "ruling": RULING_REF},
         fixed_inputs=None,  # TODO(Phase 1): dlFM 2022 の入力アストロメトリ+RV を転記
-        notes="Mamajek15 系は緩和帯へ (裁定記録第三部2)",
+        notes="Mamajek15 系は緩和帯へ。ショルツ星は Gaia DR3 にアストロメトリ解なし "
+              "(2パラメータ解のみ) — 判定不能規律の実例 (裁定ログ#5)。実行 2026-08-14: 厳格・緩和とも PASS",
     ),
     Anchor(
         id="G3-2",
@@ -66,12 +69,18 @@ G3_ANCHORS = [
         proposed_strict={"基準": "採用 RV を固定し該当系の CI90 内",
                          "t_ph_Myr": (1.27, 1.38)},
         proposed_loose={"t_ph_Myr": (1.24, 1.40), "d_ph_pc": (0.045, 0.070)},
-        strict_band={"基準": "採用 RV を固定し該当系の CI90 内",
-                     "t_ph_Myr": (1.27, 1.38), "ruling": RULING_REF},
+        strict_band={"t_ph_Myr": (1.26, 1.33), "d_ph_pc": (0.048, 0.056),
+                     "基準": "dlFM22 系に再指定 (BJ22/FP26 の d は記載入力から導出不能のため"
+                     "基準系から除外 — 帯拡大でなく基準系再指定)",
+                     "ruling": RULING_REF_G3INC},
         loose_band={"t_ph_Myr": (1.24, 1.40), "d_ph_pc": (0.045, 0.070),
                     "ruling": RULING_REF},
         fixed_inputs=None,  # TODO(Phase 1): 参照論文の採用 RV 別に入力セットを転記
-        notes="0.052 系と 0.062 系の差は採用 RV (実装バグではない)。入力固定が必須",
+        notes="公刊 d_ph は2陣営に分裂 (0.051-0.052: dlFM22/BB22/本機構 vs 0.062-0.068: "
+              "B&D16/BJ18/BJ22/FP26)。RV差説は転記で棄却。BJ22/FP26 の d は記載入力から導出不能。"
+              "BB22 単位仮説 (t 1.324 ≒ 1.294 Myr/0.97779 = pc/(km/s) 誤記の可能性、断定せず)。"
+              "緊張は Phase 2 の科学的検討事項として保持。論文付録採録 (裁定ログ#5)。"
+              "実行 2026-08-14: dlFM22 系厳格 PASS・全系緩和 PASS",
     ),
     Anchor(
         id="G3-3",
@@ -91,7 +100,9 @@ G3_ANCHORS = [
                      "scaling_n": (1.7, 2.3), "基準": "BJ+18 同一手法再現",
                      "ruling": RULING_REF},
         loose_band={"@1pc": (6, 25), "ruling": RULING_REF},
-        notes="G3 では科学的裁定をしない (実装検証に限定)",
+        notes="G3 では科学的裁定をしない (実装検証に限定)。同型プロトコル予約 (裁定ログ#5): "
+              "厳格帯不合格時は 停止→4点証拠鎖 (閉形式算術・刻み幅収束・独立実装照合・"
+              "公刊相互照合)→裁定。自動救済なし",
     ),
     Anchor(
         id="G3-4",
