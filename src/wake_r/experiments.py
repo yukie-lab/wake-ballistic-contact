@@ -121,5 +121,63 @@ def E1():
             print(f"{s_:5.2f} {p:5.2f} {m_value(0.1, s_, p, 4.0):6.2f} {surv:6.2f}")
 
 
+def one_run_e4(args):
+    sigma, seed, rho, p, Ts, tau = args
+    pos, vel = field(rho, 30, sigma, seed)
+    dt = min(0.25, 0.6 / (7 * sigma + 0.2))
+    r = contact_process_run(pos, vel, p=p, R_pc=1.0, tau_myr=tau,
+                            Ts_myr=Ts, t_max_myr=10.0, dt_myr=dt, seed=seed)
+    return dict(sigma=sigma, seed=seed, grew=bool(r["n_alive"][-1] > 0),
+                n_tx=int(r["n_transmissions"]))
+
+
+def E4():
+    """C-1: 単調性の反例探索。静的閾値近傍 p=0.55、短寿命 T_s=1.5、長遅延 τ=0.5。"""
+    sigmas = [0.0, 0.05, 0.1, 0.2, 0.4, 0.8, 1.6]
+    jobs = [(s_, seed, 1.0, 0.55, 1.5, 0.5) for s_ in sigmas for seed in range(1, 17)]
+    t0 = time.time()
+    with ProcessPoolExecutor(max_workers=6) as pool:
+        res = list(pool.map(one_run_e4, jobs))
+    (OUT / "E4_monotone.json").write_text(json.dumps(res, indent=1))
+    print(f"E4 (C-1): ρR³=1.0, p=0.55, T_s=1.5, τ=0.5 ({time.time()-t0:.0f}s)")
+    for s_ in sigmas:
+        rs = [r for r in res if r["sigma"] == s_]
+        surv = np.mean([r["grew"] for r in rs])
+        tx = np.mean([r["n_tx"] for r in rs])
+        print(f"  σ={s_:4.2f}: 生存率 {surv:.2f}  (<tx>={tx:7.0f}  m={m_value(1.0, s_, 0.55, 1.5):.2f})")
+
+
+def E4b():
+    """C-1 第2の急所: 静的ぎりぎりパーコレーション ρR³=0.7・p=1・T_s=1.0・τ=1.0。"""
+    sigmas = [0.0, 0.03, 0.07, 0.15, 0.3, 0.6, 1.2]
+    jobs = [(s_, seed, 0.7, 1.0, 1.0, 1.0) for s_ in sigmas for seed in range(1, 17)]
+    t0 = time.time()
+    with ProcessPoolExecutor(max_workers=6) as pool:
+        res = list(pool.map(one_run_e4, jobs))
+    (OUT / "E4b_monotone.json").write_text(json.dumps(res, indent=1))
+    print(f"E4b (C-1): ρR³=0.7, p=1.0, T_s=1.0, τ=1.0 ({time.time()-t0:.0f}s)")
+    for s_ in sigmas:
+        rs = [r for r in res if r["sigma"] == s_]
+        print(f"  σ={s_:4.2f}: 生存率 {np.mean([r['grew'] for r in rs]):.2f}  "
+              f"(<tx>={np.mean([r['n_tx'] for r in rs]):7.0f}  "
+              f"m={m_value(0.7, s_, 1.0, 1.0):.2f})")
+
+
+def E4c():
+    """C-1 決着プローブ: E4b の谷候補 (σ≈0.03) を 64 実現で。"""
+    sigmas = [0.0, 0.02, 0.04, 0.08, 0.16]
+    jobs = [(s_, seed, 0.7, 1.0, 1.0, 1.0) for s_ in sigmas for seed in range(1, 65)]
+    t0 = time.time()
+    with ProcessPoolExecutor(max_workers=6) as pool:
+        res = list(pool.map(one_run_e4, jobs))
+    (OUT / "E4c_dip.json").write_text(json.dumps(res, indent=1))
+    print(f"E4c: ρR³=0.7, p=1.0, T_s=1.0, τ=1.0, 64実現 ({time.time()-t0:.0f}s)")
+    for s_ in sigmas:
+        rs = [r["grew"] for r in res if r["sigma"] == s_]
+        m_ = np.mean(rs); se = np.sqrt(m_ * (1 - m_) / len(rs))
+        print(f"  σ={s_:4.2f}: 生存率 {m_:.3f} ± {se:.3f}")
+
+
 if __name__ == "__main__":
-    {"pilot": pilot, "E1": E1, "E2": E2, "E3": E3}[sys.argv[1]]()
+    {"pilot": pilot, "E1": E1, "E2": E2, "E3": E3, "E4": E4, "E4b": E4b,
+     "E4c": E4c}[sys.argv[1]]()
