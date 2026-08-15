@@ -1,0 +1,30 @@
+# 品質ゲート検査ログ(2026-08-16 02:33 JST)— 裁定ログ#10 組立仕様/出口条件
+
+## ゲート1: 修正1文言統一(禁止フレーズの残存ゼロ確認 — paper.tex + abstracts.md)
+  'truly differ': 0 件
+  'genuinely differ': 0 件
+  '真に異なる': 0 件
+  '真に上': 0 件
+
+## ゲート2: 修正2の本文化(チェックリスト注記でなく本文記載)
+  §6.6 Liggett 格子一致: 1 箇所(格子同定の明示文)
+  §6.6 隣接検証文: 1 箇所('we verified the identification')
+  §5 事象の同値: 1 箇所
+  未消化チェックリスト注記: 0 件(0 要求)
+
+## ゲート3: 引用機械検証(scripts/verify_refs.py)
+# 対象: refs.bib / 全 18 件 / 未解決 0 件
+  UNRESOLVED: 0 件(0 要求)
+
+## ゲート4: 数値一貫性
+  [認証値] Lambda_max 7.82: paper.tex=1 / cert-log=1
+  [認証値] slack +0.00483: paper.tex=1 / cert-log=1
+  [認証値] slack 0.0048 (本文丸め): paper.tex=2
+  [認証値] K_0=20: paper.tex=4 / cert-log(K₀=20判定行)=1
+  [認証値] bad 1.688e-9/1.69: paper.tex=2 / cert-log=1
+  [E8c] 1.1353±0.0055: paper.tex=1 / 図スクリプト出力=1
+  [E8c] 4.4σ: paper.tex=5(要旨2+§4+付録B+図キャプション)
+  [前線] 1.34±0.14 / 0.98±0.01: paper.tex=2/2
+
+## ゲート5: コンパイル(tectonic / XeTeX+xeCJK)
+  paper.pdf: OK (278591 bytes)
