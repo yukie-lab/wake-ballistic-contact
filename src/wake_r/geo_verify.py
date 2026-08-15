@@ -5,11 +5,17 @@
   v2  摂動角点列挙+Lipschitz(審査役9: ‖w‖ の非凸性で角点列挙は反保守 → 破棄)
   v4  区間演算(成分区間の直積包含+厳密ノルム min/max 閉形式)+ T_a=T_s/16。
       幾何余裕 +0.0029w̄ @K₀=5 を認証(インライン実行、本ファイル未反映だった)
-  v5  本版。サイクル10 の残項目1(控除/受理の正規化橋)を同一測度で認証する
+  v5  サイクル10 の残項目1(控除/受理の正規化橋)を同一測度で認証する
       橋計算を統合。受理パッチは消去(erosion)補題 θ* = slack/|w_c| で評価し、
-      控除はサイト数精密化(√3/8·j + 1 + diam𝒦/8a)+正直な Minkowski 体積
-      (平行四辺形⊕球の Steiner 公式・厳密)+方向広がり(sector)込みで評価。
-      T_a = T_s/32 に再短縮。K₀ を走査し、橋が閉じる最小 K₀ と許容 Λ̃ を出力。
+      控除はサイト数精密化(√3/8·j + 1 + diam𝒦/8a)+平行四辺形⊕球 Steiner+
+      方向広がり(sector)で評価。T_a = T_s/32。認証: K₀=20, Λ̃≤4 全τ PASS
+      (τ=0: bad 2.89e-9 / acc 2.64e-8 / Λ̃_max 4.56 — サイクル11で審査役が再現)
+  v6  本版(サイクル11 残項目1の反映)。sector 繰込み補題(一般凸箱で反例 —
+      審査役指摘)を**廃止**し、箱包 Steiner に置換: 固定 v のセグメント
+      seg[0, x](x ∈ W、W = (V⊖P)·T_a は箱)の v-合併は conv({0}∪W) ⊆
+      成分区間包 H(1行で厳密)。∪𝒦 ⊆ B(0,2R) ⊕ H₁ ⊕ (−H₂) は箱⊕球であり
+      体積は厳密閉形式 Πc + 2(Σᵢ<ⱼcᵢcⱼ)r + π(Σc)r² + (4π/3)r³。
+      方向補題が不要になり、上界は v5 より改善(保守性は厳密に単調)。
 
 幾何設計(v8 と同一): y,z 大域アンカー / x 親相対化 / 丸め Λ=(a/8)ℤ³(誤差 a/16)/
 コア着地(半幅 a/2)/ 副殻 200 分割(帯半幅 w̄/400)/ T_g = 64(τ+T_s) /
@@ -173,11 +179,13 @@ def _hull_one_branch(K, tau, ta_frac, ns=512):
 
 # ---------- 橋(控除 ν̂-質量 ≤ ½·受理 ν̂-質量)の認証 ----------
 
-def parallelepiped_ball_volume(r, L1, L2, sin_t=1.0):
-    """(球 B(r)) ⊕ seg(L1) ⊕ seg(L2) の Steiner 体積(凸・厳密):
-    2·A·r + πr²(L1+L2) + (4π/3)r³,  A = L1·L2·sinθ ≤ L1·L2"""
-    return 2.0 * L1 * L2 * sin_t * r + math.pi * r * r * (L1 + L2) \
-        + (4.0 * math.pi / 3.0) * r ** 3
+def box_ball_volume(c, r):
+    """箱(辺 c₁,c₂,c₃)⊕ 球 B(r) の Steiner 体積(凸多面体で厳密):
+    Πc + 2(c₁c₂+c₁c₃+c₂c₃)r + π(c₁+c₂+c₃)r² + (4π/3)r³
+    (辺項: 12辺・外二面角 π/2 ⇒ Σℓθ/2 = π·Σc)"""
+    c1, c2, c3 = c
+    return c1 * c2 * c3 + 2.0 * (c1 * c2 + c1 * c3 + c2 * c3) * r \
+        + math.pi * (c1 + c2 + c3) * r * r + (4.0 * math.pi / 3.0) * r ** 3
 
 
 def bridge(K, tau, ta_frac, slack_w, geo):
@@ -197,40 +205,30 @@ def bridge(K, tau, ta_frac, slack_w, geo):
     hull = [(lo * scale, hi * scale) for lo, hi in
             _hull_one_branch(K, tau, ta_frac, ns=512)]
 
-    # 相対速度区間: v ∈ hull(枝 ±)、v_P ∈ 親箱(枝 ±)
-    def rel_bounds(v_branch, p_branch):
+    # 相対速度の成分区間 → セグメント合併の箱包 H(v6: 方向補題なしで厳密)
+    def seg_hull(v_branch, p_branch):
+        """H = 成分区間包( conv({0} ∪ (V⊖P)·T_a) ⊇ ∪_v seg[0,(v−v_P)T_a] )の辺長"""
         vpc = (ux, p_branch * ux / 4.0, 0.0)
-        diffs = []
+        sides = []
         for c in range(3):
             vl, vh = hull[c]
             if v_branch < 0 and c == 1:
                 vl, vh = -vh, -vl
-            pl, ph = vpc[c] - pv, vpc[c] + pv
-            diffs.append((vl - ph, vh - pl))
-        return norm2_bounds(diffs)
+            lo = (vl - (vpc[c] + pv)) * Ta
+            hi = (vh - (vpc[c] - pv)) * Ta
+            sides.append(max(0.0, hi) - min(0.0, lo))
+        return sides
 
     vol_K = 0.0
     diam_K = 0.0
     for vb in (+1.0, -1.0):
         for pb1 in (+1.0, -1.0):       # 新親の枝
             for pb2 in (+1.0, -1.0):   # 旧親の枝
-                r1min, r1max = rel_bounds(vb, pb1)
-                r2min, r2max = rel_bounds(vb, pb2)
-                L1, L2 = r1max * Ta, r2max * Ta
-                # 方向広がり: sinβ ≤ 半径方向直径/最小距離(0 近傍は球膨張で処理)
-                def eff(rmin, rmax, L):
-                    if rmin <= 0.25 * rmax:   # 方向拘束が弱い → 球膨張
-                        return None
-                    beta = min(1.0, (rmax - rmin) / rmin)  # sinβ の保守上界
-                    return L * beta
-                e1, e2 = eff(r1min, r1max, L1), eff(r2min, r2max, L2)
-                if e1 is None or e2 is None:
-                    v = (4.0 * math.pi / 3.0) * (2.0 + L1 + L2) ** 3
-                    d = 2.0 * (2.0 + L1 + L2)
-                else:
-                    r_e = 2.0 + e1 + e2
-                    v = parallelepiped_ball_volume(r_e, L1, L2, 1.0)
-                    d = 2.0 * r_e + L1 + L2
+                s1 = seg_hull(vb, pb1)
+                s2 = seg_hull(vb, pb2)  # 符号反転は辺長不変(−H₂ の辺 = H₂ の辺)
+                c = [s1[i] + s2[i] for i in range(3)]
+                v = box_ball_volume(c, 2.0)
+                d = 4.0 + math.sqrt(sum(x * x for x in c))
                 vol_K = max(vol_K, v)
                 diam_K = max(diam_K, d)
 
