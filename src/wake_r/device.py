@@ -64,7 +64,10 @@ def real_catalog_snapshot():
 
 def contact_process_run(pos, vel, p, R_pc, tau_myr, Ts_myr=np.inf,
                         t_max_myr=50.0, dt_myr=0.1, seed=0,
-                        seed_indices=None):
+                        seed_indices=None, hold_myr=0.0):
+    # hold_myr > 0: 【D-1 対比用の変種規約】伝播はペアが R 内に hold_myr の間
+    # 滞在し続けた場合のみ成立 (滞在時間要求型)。交付文書の主規約は hold=0
+    # (進入駆動・撃ちっ放し)。層3の規約依存性の対比実験にのみ使用する。
     """接触過程を前進シミュレート。
 
     戻り値 dict:
@@ -152,28 +155,39 @@ def contact_process_run(pos, vel, p, R_pc, tau_myr, Ts_myr=np.inf,
                 if mark_time[j] <= t and death_time[j] > t:
                     continue  # マーク済み
                 dp = P[j] - P[si]
+                dv = vel[j] - vel[si]
+                vv = float(dv @ dv)
                 d0 = float(np.linalg.norm(dp))
                 if d0 <= R_pc:
-                    # 既に R 内 (進入は過去に処理済みのはずだが、シード直後の
-                    # 初期近傍はここで初回試行になる)
+                    # 既に R 内 (シード直後の初期近傍はここで初回試行になる)
                     t_entry = t
+                    if vv > 0:
+                        b_ = float(dp @ dv)
+                        disc = b_ * b_ - vv * (d0 * d0 - R_pc * R_pc)
+                        t_exit = t + (-b_ + np.sqrt(max(disc, 0.0))) / vv
+                    else:
+                        t_exit = np.inf
                 else:
-                    dv = vel[j] - vel[si]
-                    vv = float(dv @ dv)
                     if vv <= 0:
                         continue
                     t_star = -float(dp @ dv) / vv
                     if not (0 < t_star <= dt_myr):
                         continue
-                    d_min = float(np.linalg.norm(dp + dv * t_star))
-                    if d_min > R_pc:
+                    d_min2 = float(np.linalg.norm(dp + dv * t_star)) ** 2
+                    if d_min2 > R_pc * R_pc:
                         continue
-                    t_entry = t + t_star
+                    half = np.sqrt((R_pc * R_pc - d_min2) / vv)
+                    t_entry = t + t_star - half   # 真の進入時刻 α
+                    t_exit = t + t_star + half    # 退出時刻 β
+                    t_entry = max(t_entry, t)     # 格子区間開始より前には遡らない
+                if hold_myr > 0.0 and (t_exit - t_entry) < hold_myr:
+                    tried_pairs.add((si, j))      # 滞在不足 — このペアの機会は消費
+                    continue
                 tried_pairs.add((si, j))
                 n_att += 1
                 if rng.random() < p:
                     n_tx += 1
-                    pending_t.append((t_entry + tau_myr, j))
+                    pending_t.append((t_entry + hold_myr + tau_myr, j))
     return dict(t=t_grid, X=X, n_alive=n_alive_arr, extent=extent,
                 survived=True, extinction_time=np.nan,
                 n_attempts=n_att, n_transmissions=n_tx,

@@ -220,6 +220,64 @@ def E5():
               f"{np.std(ratios)/np.sqrt(len(ratios)):.2f}  (>1 なら加速 = 超線形の兆候)")
 
 
+def one_run_e6(seed):
+    import numpy as np
+    rng = np.random.default_rng(seed)
+    rho, box, s0 = 0.05, 100.0, 0.5
+    n = rng.poisson(rho * box ** 3)
+    pos = rng.uniform(-box / 2, box / 2, (n, 3))
+    vel = rng.standard_normal((n, 3)) * s0
+    from wake_r.device import contact_process_run
+    r = contact_process_run(pos, vel, p=1.0, R_pc=1.0, tau_myr=0.1,
+                            Ts_myr=np.inf, t_max_myr=40.0, dt_myr=0.1, seed=seed)
+    # 装置はマーク集合を返さないため、extent の加速で代理…ではなく
+    # ここでは装置を再現せずに済むよう mark_time を直接得る拡張が必要 → 近似:
+    # extent(t)/t の増加列を速さの下界として使う
+    t = r["t"]; e = r["extent"]
+    idx = [int(len(t)*f) for f in (0.25, 0.5, 0.75, 1.0)]
+    return [float(e[i-1] / t[i-1]) for i in idx]
+
+
+def E6():
+    """C6a 機構チェック: extent(t)/t (前線の実効速さ) が単調増大するか (ガウス, T_s=∞)。
+    定理の機構: 次第に速い粒子がマークされ前線を運ぶ → R(t)/t は増加列。"""
+    with ProcessPoolExecutor(max_workers=6) as pool:
+        res = list(pool.map(one_run_e6, range(1, 7)))
+    arr = np.array(res)
+    (OUT / "E6_speed.json").write_text(json.dumps(res, indent=1))
+    labels = ["t=25%", "t=50%", "t=75%", "t=100%"]
+    print("E6: 前線実効速さ R(t)/t の推移 (6実現平均, σ=0.5, 最大寄与は裾粒子):")
+    for k, lab in enumerate(labels):
+        print(f"  {lab}: {arr[:, k].mean():.3f} ± {arr[:, k].std()/np.sqrt(6):.3f}")
+
+
+def one_run_e7(args):
+    sigma, seed = args
+    pos, vel = field(0.1, 60, sigma, seed)
+    dt = min(0.25, 0.6 / (7 * sigma + 0.2))
+    r = contact_process_run(pos, vel, p=1.0, R_pc=1.0, tau_myr=0.1,
+                            Ts_myr=4.0, t_max_myr=16.0, dt_myr=dt, seed=seed,
+                            hold_myr=0.8)
+    return dict(sigma=sigma, seed=seed, grew=bool(r["n_alive"][-1] > 0),
+                n_tx=int(r["n_transmissions"]))
+
+
+def E7():
+    """D-1: 滞在時間要求型 (hold=0.8) の σ 依存 — 非単調 (最適速度) の検証。"""
+    sigmas = [0.1, 0.2, 0.4, 0.8, 1.6, 3.2]
+    jobs = [(s_, seed) for s_ in sigmas for seed in range(1, 17)]
+    t0 = time.time()
+    with ProcessPoolExecutor(max_workers=6) as pool:
+        res = list(pool.map(one_run_e7, jobs))
+    (OUT / "E7_dwell.json").write_text(json.dumps(res, indent=1))
+    print(f"E7 (D-1 滞在時間型): ρR³=0.1, p=1, T_s=4, hold=0.8 ({time.time()-t0:.0f}s)")
+    print("  (参考: σ=0 の静的は deg=0.42 ≪ パーコレーション → 死。進入駆動型なら σ 単調)")
+    for s_ in sigmas:
+        rs = [r for r in res if r["sigma"] == s_]
+        print(f"  σ={s_:4.2f}: 生存率 {np.mean([r['grew'] for r in rs]):.2f}  "
+              f"(<tx>={np.mean([r['n_tx'] for r in rs]):7.0f})")
+
+
 if __name__ == "__main__":
     {"pilot": pilot, "E1": E1, "E2": E2, "E3": E3, "E4": E4, "E4b": E4b,
-     "E4c": E4c, "E5": E5}[sys.argv[1]]()
+     "E4c": E4c, "E5": E5, "E6": E6, "E7": E7}[sys.argv[1]]()
