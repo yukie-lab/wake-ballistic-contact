@@ -117,7 +117,9 @@ def main():
     # 2. 題箋に DOI 追記(冪等)→ 再コンパイル
     tex = PAPER / "paper.tex"
     s = tex.read_text()
-    if doi not in s:
+    if DRY:
+        print(f"[2] (dry) 題箋に doi:{doi} を追記(書換なし)")
+    elif doi not in s:
         old = r"\large (Preprint --- Zenodo v1)"
         assert old in s, "題箋パターンが見つからない"
         s = s.replace(old, rf"\large (Preprint --- Zenodo v1, doi:{doi})")
