@@ -19,7 +19,7 @@
 - **Publication date**: 2026-08-16
 - **Title**: Contact processes on ballistic Poisson particles: criticality,
   fronts, and when motion helps colonization
-- **Creators**: Maeda, Yukie(所属なし・独立研究者)
+- **Creators**: Maeda, Yukie(所属なし・独立研究者、ORCID iD: 0009-0005-3401-9230)【承認裁定で確定】
 - **Description**: abstracts.md の英語+日本語を併記し、末尾に1行:
   "The complete artifact repository (verifier, certification logs,
   falsification device, experiment archive, review records) is bundled as
@@ -27,8 +27,9 @@
   審査記録の全量を wake-repo-v1.tar.gz として同梱する。」
 - **Version**: v1(**プレプリント**と明記 — 裁定ログ#10)
 - **Language**: eng(説明文は日英併記)
-- **License(提案)**: **CC BY 4.0**(レコード全体。コード部分も含め引用可能性を優先。
-  コードのみ MIT 併用の選択肢あり — 前田さんの裁定事項)
+- **License(承認裁定で確定)**: **CC BY 4.0(レコード)+コードは MIT を
+  アーカイブ内 LICENSE で宣言**する併用構成(リポジトリ直下 LICENSE に実装済み。
+  説明文にも併用の1行を追加する)
 - **Keywords**: contact process; percolation; Poisson point process;
   interacting particle systems; ballistic motion; mobile agents;
   epidemics on moving populations; Fermi paradox
