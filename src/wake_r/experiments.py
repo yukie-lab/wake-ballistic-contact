@@ -178,6 +178,48 @@ def E4c():
         print(f"  σ={s_:4.2f}: 生存率 {m_:.3f} ± {se:.3f}")
 
 
+def one_run_e5(args):
+    kind, seed = args
+    rng = np.random.default_rng(seed)
+    rho, box, s0 = 0.05, 100.0, 0.5
+    n = rng.poisson(rho * box ** 3)
+    pos = rng.uniform(-box / 2, box / 2, (n, 3))
+    if kind == "gauss":
+        vel = rng.standard_normal((n, 3)) * s0
+    else:  # 固定速さ (RMS を合わせる: |v| = s0*sqrt(3))
+        u = rng.standard_normal((n, 3))
+        u /= np.linalg.norm(u, axis=1)[:, None]
+        vel = u * (s0 * np.sqrt(3.0))
+    r = contact_process_run(pos, vel, p=1.0, R_pc=1.0, tau_myr=0.1,
+                            Ts_myr=np.inf, t_max_myr=48.0, dt_myr=0.1, seed=seed)
+    return dict(kind=kind, seed=seed, t=[float(x) for x in r["t"][::40]],
+                extent=[float(x) for x in r["extent"][::40]])
+
+
+def E5():
+    """C6: 前線成長 — ガウス (非有界) vs 固定速さ (有界)、RMS 一致、T_s=∞。"""
+    jobs = [(k, seed) for k in ["gauss", "fixed"] for seed in range(1, 7)]
+    t0 = time.time()
+    with ProcessPoolExecutor(max_workers=6) as pool:
+        res = list(pool.map(one_run_e5, jobs))
+    (OUT / "E5_front.json").write_text(json.dumps(res, indent=1))
+    print(f"E5 ({time.time()-t0:.0f}s): 前線 extent(t) — 前半/後半の平均成長率比")
+    for kind in ["gauss", "fixed"]:
+        rs = [r for r in res if r["kind"] == kind]
+        ratios = []
+        for r in rs:
+            t, e = np.array(r["t"]), np.array(r["extent"])
+            ok = e < 45.0  # 箱端 (box/2=50) 手前まで
+            t, e = t[ok], e[ok]
+            if len(t) < 6: continue
+            h = len(t) // 2
+            v1 = (e[h] - e[1]) / (t[h] - t[1])
+            v2 = (e[-1] - e[h]) / (t[-1] - t[h])
+            ratios.append(v2 / max(v1, 1e-9))
+        print(f"  {kind:6s}: 後半/前半 成長率比 = {np.mean(ratios):.2f} ± "
+              f"{np.std(ratios)/np.sqrt(len(ratios)):.2f}  (>1 なら加速 = 超線形の兆候)")
+
+
 if __name__ == "__main__":
     {"pilot": pilot, "E1": E1, "E2": E2, "E3": E3, "E4": E4, "E4b": E4b,
-     "E4c": E4c}[sys.argv[1]]()
+     "E4c": E4c, "E5": E5}[sys.argv[1]]()

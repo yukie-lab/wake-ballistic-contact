@@ -83,11 +83,14 @@ def contact_process_run(pos, vel, p, R_pc, tau_myr, Ts_myr=np.inf,
 
     mark_time = np.full(n, np.inf)     # マーク成立時刻
     death_time = np.full(n, np.inf)
+    ever_marked = np.zeros(n, dtype=bool)   # 再マーク計数用 (タスク A-1)
+    n_remark = 0
     pending_t = []                     # 着弾予定 (t_arrive, j)
     tried_pairs = set()                # 初回進入試行済みペア
 
     for j in seed_indices:
         mark_time[j] = 0.0
+        ever_marked[j] = True
         death_time[j] = rng.exponential(Ts_myr) if np.isfinite(Ts_myr) else np.inf
 
     steps = int(round(t_max_myr / dt_myr))
@@ -111,6 +114,9 @@ def contact_process_run(pos, vel, p, R_pc, tau_myr, Ts_myr=np.inf,
             pending_t = [(ta, j) for (ta, j) in pending_t if ta > t]
             for ta, j in due:
                 if not (mark_time[j] <= ta and death_time[j] > ta):
+                    if ever_marked[j]:
+                        n_remark += 1
+                    ever_marked[j] = True
                     mark_time[j] = ta
                     death_time[j] = ta + (rng.exponential(Ts_myr)
                                           if np.isfinite(Ts_myr) else np.inf)
@@ -130,7 +136,8 @@ def contact_process_run(pos, vel, p, R_pc, tau_myr, Ts_myr=np.inf,
                                               (t_grid, X, n_alive_arr, extent))
             return dict(t=t_grid, X=X, n_alive=n_alive_arr, extent=extent,
                         survived=False, extinction_time=t,
-                        n_attempts=n_att, n_transmissions=n_tx)
+                        n_attempts=n_att, n_transmissions=n_tx,
+                        n_remark=n_remark, n_ever=int(ever_marked.sum()))
         if k == steps or n_alive == 0:
             continue
         # 区間 (t, t+dt] の進入検出: 線形 CPA
@@ -169,4 +176,5 @@ def contact_process_run(pos, vel, p, R_pc, tau_myr, Ts_myr=np.inf,
                     pending_t.append((t_entry + tau_myr, j))
     return dict(t=t_grid, X=X, n_alive=n_alive_arr, extent=extent,
                 survived=True, extinction_time=np.nan,
-                n_attempts=n_att, n_transmissions=n_tx)
+                n_attempts=n_att, n_transmissions=n_tx,
+                n_remark=n_remark, n_ever=int(ever_marked.sum()))
