@@ -42,7 +42,8 @@ work is disclosed in Section~\ref{sec:verification} and Appendix~B.}}
 $M(\rho,\nu,R,p,\tau,\Ts)$(進入駆動・撃ちっ放し・対一回・再マーク許可)を導入し、
 その臨界構造を確立する。主結果: (i) 転送核のスペクトル条件 $r(K)<1$ による絶滅定理
 (定理A)、(ii) この SIR 型分枝上界は再マーク許可の完全モデルには拡張されないこと
-(逆向きチャネルの反証、$4.4\sigma$ の数値確定)、(iii) 静的極限とボンド希釈
+(逆向きチャネルによる期待総子孫数 --- 種を含むマーク事象総数 $N$ --- の
+分枝上界超過、$4.4\sigma$ の数値確定)、(iii) 静的極限とボンド希釈
 ランダム幾何グラフの生存事象の同値(定理B)、(iv) 完全モデルの生存定理(定理C2 ---
 セル・リレー構成、私有コイン結合、正規化橋、区間演算による機械認証)、
 (v) 「静的幾何が禁じる疎密度でも十分速い運動は入植を可能にする」(定理D)、
@@ -65,7 +66,8 @@ the SIR-type variant dies out almost surely (Theorem~A), and the underlying
 moment computation is exact. Second, this branching-type upper bound
 \emph{does not extend} to the full model with re-marking: a
 ``reverse channel'', by which a child re-marks its dead parent, produces a
-first-order excess over the branching bound, certified numerically at
+first-order excess of the expected total progeny (mark events including the
+seed) over the branching bound, certified numerically at
 $4.4\sigma$ (Section~\ref{sec:afull}). Third, in the static limit the
 survival event coincides with percolation of a bond-diluted random geometric
 graph (Theorem~B). Fourth, our main result: a survival theorem for the full
@@ -167,8 +169,8 @@ condition is sharp at the level of first moments.
 
 \begin{namedprop}{Proposition (the SIR bound does not extend; Section~\ref{sec:afull})}
 There are parameter regions with scalar mean $\bar m<1$ in which the full
-model satisfies $\E[N]>1/(1-\bar m)$, where $N$ is the total number of
-transmission events. Consequently, \emph{the SIR-type
+model satisfies $\E[N]>1/(1-\bar m)$, where $N$ is the \emph{total
+progeny}: the total number of mark events, including the seed. Consequently, \emph{the SIR-type
 (branching-process) threshold description does not extend to the full model
 with re-marking}: the excess is produced by a first-order
 ``reverse channel'' (a child re-marks its dead parent through the unused
@@ -299,7 +301,7 @@ in review (Appendix~B, cycle~1).
 Chains do \emph{not} factor into scalar means: the velocity of the relay
 particle is shared between consecutive links, so the correct object is the
 kernel $K$ acting on $L^2(\nu)$, not the scalar $\bar m=\int K\dd\nu\dd\nu$.
-If $r(K)<1$, the expected total number of transmission events is finite and
+If $r(K)<1$, the expected total progeny is finite and
 the SIR variant dies out a.s.
 
 %======================================================================
@@ -311,7 +313,8 @@ $\bar m$-type conditions. It does not.
 \begin{namedprop}{Proposition (reverse channel)}
 There exist parameters with $\bar m<1$ (e.g.\ near-static pairs, $p=1$,
 $\tau=10\,\Ts$, $\deg=0.1$) for which the full model satisfies
-$\E[N]>1/(1-\bar m)$.
+$\E[N]>1/(1-\bar m)$, where $N$ is the total progeny (mark events
+including the seed).
 \end{namedprop}
 
 The mechanism is a \emph{first-order self-influence} that Mecke chain
@@ -330,9 +333,9 @@ open (Section~\ref{sec:open}).
 
 \begin{figure}[t]\centering
 \includegraphics[width=.6\textwidth]{figs/fig3_reverse_channel.pdf}
-\caption{Reverse channel (experiment E8c): histogram of the total number of
-transmission events $N$ over $10^4$ realizations in the counterexample
-regime. The measured mean exceeds the branching bound by $4.4\sigma$.
+\caption{Reverse channel (experiment E8c): histogram of the total progeny
+$N$ (mark events including the seed) over $10^4$ realizations in the
+counterexample regime. The measured mean exceeds the branching bound by $4.4\sigma$.
 Reproduce: \texttt{python3 src/wake\_r/paper\_figs.py} (data:
 \texttt{data/phase\_r/E8c\_counterexample.json}).}
 \label{fig:reverse}
@@ -543,7 +546,8 @@ is disclosed in Appendix~B; (iii) machine certification, by interval
 arithmetic, of every geometric constant of the survival proof, including the
 normalization bridge (Appendix~A). All bibliography entries carry an arXiv
 identifier or DOI and were mechanically resolved by the verification script
-of Appendix~A; the resolution log is included in the artifact bundle.
+of Appendix~A; the resolution log is included in the bundled repository
+archive (\texttt{wake-repo-v1.tar.gz}).
 
 \textbf{Boundary.} This internal verification --- independent AI review
 instances plus machine certification --- \emph{is not a substitute for human
@@ -588,7 +592,9 @@ disclosure.
 \section{Machine certification bundle}\label{app:cert}
 
 \subsection{Contents}
-The artifact repository accompanying this preprint contains:
+The complete repository snapshot is bundled with this Zenodo record as
+\texttt{wake-repo-v1.tar.gz} (all version-tracked files at the release
+commit; regenerate with \texttt{git archive}). It contains:
 \texttt{src/wake\_r/geo\_verify.py} (certifying verifier, version~6;
 deterministic, standard library only),
 \texttt{docs/phase-r/certification-log-v6.txt} (full scan log),
@@ -721,7 +727,8 @@ $t_j=\max(\inf T_j,t_{j-1}+\tau)$; operator power bound
 $\E[\#\text{chains of length }k]=\langle\mathbf{1},K^k\mathbf{1}\rangle$
 with equality; summability under $r(K)<1$ and a.s.\ extinction of the SIR
 variant. As accepted in review cycle 1; the full text follows the record in
-the artifact repository, file \texttt{docs/phase-r/claims.md}.]
+the bundled repository archive (\texttt{wake-repo-v1.tar.gz}), file
+\texttt{docs/phase-r/claims.md}.]
 
 \subsection{Theorem B}
 As in Section~\ref{sec:thmB}; the event identification is elementary given
@@ -730,7 +737,8 @@ the single-interval property and instant attempts at marking times.
 \subsection{Theorem C2}
 The complete proof in its accepted form (review cycle 11 plus accepted
 wording fixes) follows the consolidated record
-\texttt{docs/phase-r/c2-proof-final.md} in the artifact repository, whose
+\texttt{docs/phase-r/c2-proof-final.md} in the bundled repository archive
+(\texttt{wake-repo-v1.tar.gz}), whose
 sections map to: parameters and lattice; the geometry contract (interval
 certification); the erosion patch lemma; the disclosure-capsule
 identification; the normalization bridge (box-hull Steiner volume, site

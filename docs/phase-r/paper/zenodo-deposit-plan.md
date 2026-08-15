@@ -1,0 +1,46 @@
+# Zenodo v1 デポジット案(F2 — 前田さんの公開承認待ち。承認前アップロード不可)
+
+## レコード構成(ファイル2点)
+
+| ファイル | 内容 |
+|---|---|
+| `paper.pdf` | 本文(英語・和文要旨付き・15p)。F1/F2 反映済み・品質ゲート v2 全PASS |
+| `wake-repo-v1.tar.gz` | **リポジトリ全量スナップショット**(git 追跡ファイル全量、公開承認時点のリリースコミット)。検証器 v6・認証ログ・数値反証装置・実験 archive(E1–E8c)・審査記録(claims.md ほか)・付録原本・図生成/引用検証スクリプトを含む |
+
+生成コマンド(再現可能): `git archive --format=tar.gz -o wake-repo-v1.tar.gz <リリースコミット>`
+(sha256 を本文書に追記の上で公開承認に付す)
+
+## メタデータ案
+
+- **Upload type**: Publication → Preprint
+- **Publication date**: 2026-08-16
+- **Title**: Contact processes on ballistic Poisson particles: criticality,
+  fronts, and when motion helps colonization
+- **Creators**: Maeda, Yukie(所属なし・独立研究者)
+- **Description**: abstracts.md の英語+日本語を併記し、末尾に1行:
+  "The complete artifact repository (verifier, certification logs,
+  falsification device, experiment archive, review records) is bundled as
+  wake-repo-v1.tar.gz." / 「検証器・認証ログ・数値反証装置・実験 archive・
+  審査記録の全量を wake-repo-v1.tar.gz として同梱する。」
+- **Version**: v1(**プレプリント**と明記 — 裁定ログ#10)
+- **Language**: eng(説明文は日英併記)
+- **License(提案)**: **CC BY 4.0**(レコード全体。コード部分も含め引用可能性を優先。
+  コードのみ MIT 併用の選択肢あり — 前田さんの裁定事項)
+- **Keywords**: contact process; percolation; Poisson point process;
+  interacting particle systems; ballistic motion; mobile agents;
+  epidemics on moving populations; Fermi paradox
+
+## 承認後の実行手順(実行系)
+
+1. Zenodo 新規デポジット作成 → **DOI を予約**(publish 前に取得可能)
+2. 予約 DOI を paper.tex の題箋に追記("(Preprint --- Zenodo v1, doi:...)")→
+   再コンパイル → リリースコミット確定
+3. `git archive` でリリースコミットから wake-repo-v1.tar.gz 生成・sha256 記録
+4. paper.pdf + tar.gz をアップロード、メタデータ入力(本案どおり)、publish
+5. PHASES 台帳・memory に DOI を記録。GitHub 相互参照は公開リポジトリ整備後
+   (別途裁定 — 裁定ログ#9 の「従来どおり GitHub と相互参照」の具体化)
+
+## 禁止事項の再確認
+
+- 承認前の Zenodo アップロード・外部送付(エンドーサー依頼含む)は行わない
+- 本案の変更が必要な場合は停止・報告(実装で解決しない)

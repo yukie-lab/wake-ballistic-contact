@@ -4,3 +4,4 @@ __pycache__/
 data/raw/
 *.parquet
 data/
+docs/phase-r/paper/*.tar.gz

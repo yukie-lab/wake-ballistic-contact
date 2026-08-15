@@ -97,7 +97,7 @@ def fig3_reverse():
                label=r"branching bound $1/(1-\bar m)=1.1111$")
     ax.axvline(mean, color="#c0392b", lw=1.2,
                label=rf"measured $\mathbb{{E}}[N]={mean:.4f}\pm{sem:.4f}$")
-    ax.set_xlabel(r"total transmission events $N$ per realization")
+    ax.set_xlabel(r"total progeny $N$ per realization (mark events incl. seed)")
     ax.set_ylabel("count (log)")
     ax.legend(frameon=False, fontsize=7.5)
     fig.tight_layout()
