@@ -278,6 +278,86 @@ def E7():
               f"(<tx>={np.mean([r['n_tx'] for r in rs]):7.0f})")
 
 
+def one_run_e8(args):
+    tau, seed = args
+    pos, vel = field(0.1, 60, 1.0, seed)
+    r = contact_process_run(pos, vel, p=0.8, R_pc=1.0, tau_myr=tau,
+                            Ts_myr=2.0, t_max_myr=24.0, dt_myr=0.08, seed=seed)
+    return dict(tau=tau, seed=seed, n_ever=r["n_ever"], n_remark=r["n_remark"],
+                grew=bool(r["n_alive"][-1] > 0))
+
+
+def E8():
+    """逆向きチャネルの検証 (審査役4の発見): 再マーク率は τ/T_s とともに増えるか。
+    予言: 子の到着が親の死後になる τ ≳ T_s で親の再マークが増加。"""
+    taus = [0.02, 0.5, 1.0, 2.0, 4.0, 8.0]
+    jobs = [(t_, seed) for t_ in taus for seed in range(1, 17)]
+    t0 = time.time()
+    with ProcessPoolExecutor(max_workers=6) as pool:
+        res = list(pool.map(one_run_e8, jobs))
+    (OUT / "E8_reverse.json").write_text(json.dumps(res, indent=1))
+    print(f"E8 (逆向きチャネル): ρR³=0.1, p=0.8, σ=1, T_s=2 ({time.time()-t0:.0f}s)")
+    print(f"{'τ/T_s':>6} {'再マーク率':>8} {'生存率':>6} {'<総事象>':>8}")
+    for t_ in taus:
+        rs = [r for r in res if r["tau"] == t_]
+        tot_re = sum(r["n_remark"] for r in rs)
+        tot_ev = sum(r["n_ever"] + r["n_remark"] for r in rs)
+        surv = np.mean([r["grew"] for r in rs])
+        print(f"{t_/2.0:6.2f} {tot_re/max(tot_ev,1):8.3f} {surv:6.2f} "
+              f"{tot_ev/len(rs):8.0f}")
+
+
+def one_run_e8b(args):
+    tau, seed = args
+    pos, vel = field(0.05, 40, 0.05, seed)   # 遅い混合: 窓長 ~ R/(2.26·0.05) ≈ 9
+    r = contact_process_run(pos, vel, p=1.0, R_pc=1.0, tau_myr=tau,
+                            Ts_myr=1.0, t_max_myr=40.0, dt_myr=0.1, seed=seed)
+    return dict(tau=tau, seed=seed, n_ever=r["n_ever"], n_remark=r["n_remark"])
+
+
+def E8b():
+    """逆向きチャネル・審査役4の反例レジーム: 遅い相対速度 (長窓) × τ/T_s 走査。
+    予言: 親再マーク経路が τ/T_s とともに増え p(1−e^{−2τ/T_s}) で飽和。"""
+    taus = [0.1, 0.5, 1.0, 2.0, 4.0]
+    jobs = [(t_, seed) for t_ in taus for seed in range(1, 25)]
+    t0 = time.time()
+    with ProcessPoolExecutor(max_workers=6) as pool:
+        res = list(pool.map(one_run_e8b, jobs))
+    (OUT / "E8b_reverse.json").write_text(json.dumps(res, indent=1))
+    print(f"E8b (反例レジーム): ρR³=0.05, σ=0.05, p=1, T_s=1, 窓長~9 ({time.time()-t0:.0f}s)")
+    print(f"{'τ/T_s':>6} {'再マーク率':>8} {'<総事象>':>8} {'飽和予測 p(1-e^-2τ)':>16}")
+    import math
+    for t_ in taus:
+        rs = [r for r in res if r["tau"] == t_]
+        tot_re = sum(r["n_remark"] for r in rs)
+        tot_ev = sum(r["n_ever"] + r["n_remark"] for r in rs)
+        pred = 1.0 * (1 - math.exp(-2 * t_ / 1.0))
+        print(f"{t_:6.1f} {tot_re/max(tot_ev,1):8.3f} {tot_ev/len(rs):8.0f} {pred:16.3f}")
+
+
+def one_run_e8c(seed):
+    rho = 0.1 * 3 / (4 * np.pi)   # deg_sup = ρV_R = 0.1
+    pos, vel = field(rho, 40, 0.001, seed)  # 準静的 (窓長 ~440 ≫ 多世代×τ)
+    r = contact_process_run(pos, vel, p=1.0, R_pc=1.0, tau_myr=10.0,
+                            Ts_myr=1.0, t_max_myr=150.0, dt_myr=0.25, seed=seed)
+    return r["n_ever"] + r["n_remark"]
+
+
+def E8c():
+    """審査役4の反例の直接判定: p=1, τ=10T_s, deg=0.1, 準静的。
+    偽の上界 1/(1-m̄) = 1.111 vs 審査役の下界 ≈ 1.185 を E[N] 実測で判定。"""
+    t0 = time.time()
+    with ProcessPoolExecutor(max_workers=6) as pool:
+        res = list(pool.map(one_run_e8c, range(1, 10001)))
+    arr = np.array(res, dtype=float)
+    (OUT / "E8c_counterexample.json").write_text(json.dumps(res))
+    mean, se = arr.mean(), arr.std() / np.sqrt(len(arr))
+    print(f"E8c ({time.time()-t0:.0f}s, 10000実現): E[総マーク事象数] = {mean:.4f} ± {se:.4f}")
+    print(f"  偽の上界 1/(1−m̄) = 1.1111 / 審査役の下界 ≈ 1.185")
+    print(f"  判定: {'定理 A-full は数値的にも棄却' if mean - 2*se > 1.1111 else '判定保留'}")
+
+
 if __name__ == "__main__":
     {"pilot": pilot, "E1": E1, "E2": E2, "E3": E3, "E4": E4, "E4b": E4b,
-     "E4c": E4c, "E5": E5, "E6": E6, "E7": E7}[sys.argv[1]]()
+     "E4c": E4c, "E5": E5, "E6": E6, "E7": E7, "E8": E8, "E8b": E8b,
+     "E8c": E8c}[sys.argv[1]]()
