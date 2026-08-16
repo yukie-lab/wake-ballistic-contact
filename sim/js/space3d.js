@@ -2,11 +2,13 @@
 WAKE.space = (() => {
   const cv = document.getElementById("glCanvas");
   const renderer = new THREE.WebGLRenderer({ canvas: cv, antialias: true });
+  renderer.setPixelRatio(devicePixelRatio);
+  let lastW = 0, lastH = 0;
   const scene = new THREE.Scene();
   const cam = new THREE.PerspectiveCamera(55, 2, 0.05, 4000);
   let az = 0.6, el = 0.35, dist = 60, target = new THREE.Vector3(0, 0, 0);
   let bundlePts, nomPts, trailSeg, pathLine, labelSprites = [];
-  let N, B = 16, pos0, vel, colors, entries;
+  let N, B = 16, pos0, vel, colors, entries;   // B はカタログの束本数から実測(init)
 
   function camUpdate() {
     cam.position.set(target.x + dist * Math.cos(el) * Math.cos(az),
@@ -34,6 +36,7 @@ WAKE.space = (() => {
   function init() {
     entries = WAKE.data.cat.entries.filter(e => e.display_bundle);
     N = entries.length;
+    B = entries.length ? entries[0].display_bundle.pos_pc.length : 16;
     pos0 = new Float32Array(N * B * 3); vel = new Float32Array(N * B * 3);
     colors = new Float32Array(N * B * 3);
     const sizes = [];
@@ -89,7 +92,8 @@ WAKE.space = (() => {
     pathLine = new THREE.Line(g, new THREE.LineBasicMaterial({ color: 0xd9a441 }));
     scene.add(pathLine);
     const info = document.getElementById("starInfo");
-    info.style.display = "block";
+    WAKE._pathInfo = true;   // 表示可否は showView が握る(space 専用)
+    info.style.display = WAKE.state.view === "space" ? "block" : "none";
     info.innerHTML = `<b>${WAKE.t("siTitle")}</b><br>` +
       `${WAKE.t("siDv")}${bp.best_transfer_dv_kms}${WAKE.t("siDvTail")}<br>` +
       `<span style="color:var(--dim)">${WAKE.t("siNote")}</span>`;
@@ -102,7 +106,10 @@ WAKE.space = (() => {
     attr.needsUpdate = true;
     labelSprites.forEach(([sp, fn]) => { const p = fn(); sp.position.set(p.x, p.y + 1.2, p.z); });
     const w = cv.clientWidth, h = cv.clientHeight;
-    if (cv.width !== w * devicePixelRatio) { renderer.setSize(w, h, false); cam.aspect = w / h; cam.updateProjectionMatrix(); }
+    if (w !== lastW || h !== lastH) {   // setSize は毎フレーム呼ぶと再確保で fps が崩壊する
+      renderer.setSize(w, h, false); cam.aspect = w / h; cam.updateProjectionMatrix();
+      lastW = w; lastH = h;
+    }
     renderer.render(scene, cam);
   }
   return { init, frame, refreshInfo: () => { if (entries) drawBestPath(); } };

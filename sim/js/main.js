@@ -10,6 +10,9 @@
     document.querySelectorAll("nav button[data-view]").forEach(b =>
       b.classList.toggle("active", b.dataset.view === name));
     WAKE.state.view = name;
+    // 最小乗換経路パネルは 3D ビュー専用
+    document.getElementById("starInfo").style.display =
+      (name === "space" && WAKE._pathInfo) ? "block" : "none";
     renderCtrl();
   };
   document.querySelectorAll("nav button[data-view]").forEach(b =>
@@ -101,7 +104,7 @@
   await applyLang();
 
   // ループ
-  let last = performance.now(), frames = 0, fpsAt = last;
+  let last = performance.now(), frames = 0, fpsAt = last, lastSentence = "";
   function loop(now) {
     if (WAKE.state.playing) {
       WAKE.state.t += (now - last) / 1000 * 1.2;
@@ -114,8 +117,9 @@
     const v = WAKE.state.view || "timeline";
     if (v === "timeline") WAKE.timeline.draw();
     if (v === "space") WAKE.space.frame();
-    if (v === "map") { WAKE.map.draw(); document.getElementById("sentence").textContent = WAKE.map.sentence(); }
-    else document.getElementById("sentence").textContent = WAKE.t("sentPointer");
+    if (v === "map") WAKE.map.draw();
+    const s = v === "map" ? WAKE.map.sentence() : WAKE.t("sentPointer");
+    if (s !== lastSentence) { document.getElementById("sentence").textContent = s; lastSentence = s; }
     frames++;
     if (now - fpsAt > 1000) {
       document.getElementById("fps").textContent =

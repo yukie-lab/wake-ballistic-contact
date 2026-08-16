@@ -136,12 +136,13 @@ def main():
             lam[f"{dmax:.0f}pc"] = round(tot / N_SURR, 3)
         return lam
 
-    # 表示用誤差束(16 サロゲートの太陽中心 6D — 実共分散から生成、裁定#18 裁定1)
+    # 表示用誤差束(32 サロゲートの太陽中心 6D — 実共分散から生成、裁定#18 裁定1。
+    # 16→32 は性能実測(タイムライン0.88ms/3D 0.53ms/フレーム @M4)による増量)
     from wake_p2.run_mc import _surrogates
     from wake_data.icrs import icrs_to_helio_galactic
     rngb = np.random.default_rng(20260817)
     entry_idx = np.array([e["star_index"] for e in entries])
-    N_B = 16
+    N_B = 32
     # _surrogates は N_SURR 列生成なので、対象星のみ小規模再生成
     import wake_p2.run_mc as rm
     saved = rm.N_SURR
@@ -155,7 +156,7 @@ def main():
             ra_b[i][okb], dec_b[i][okb], plx_b[i][okb],
             pmra_b[i][okb], pmdec_b[i][okb], rv_b[i][okb])
         e["display_bundle"] = {
-            "note": "16 surrogates, real covariance; linear display propagation",
+            "note": f"{N_B} surrogates, real covariance; linear display propagation",
             "pos_pc": np.round(pos_b, 3).tolist(),
             "vel_pc_myr": np.round(vel_b * 1.02271, 4).tolist(),
         }

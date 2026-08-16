@@ -4,19 +4,20 @@ WAKE.timeline = (() => {
   const ctx = cv.getContext("2d");
   let W, H;
   const X = t => (t + 10) / 20 * (W - 90) + 60;
-  const Y = d => H - 60 - (Math.log10(Math.max(d, 0.02)) - Math.log10(0.02)) /
-                 (Math.log10(6) - Math.log10(0.02)) * (H - 110);
+  const Y = d => H - 140 - (Math.log10(Math.max(d, 0.02)) - Math.log10(0.02)) /
+                 (Math.log10(6) - Math.log10(0.02)) * (H - 190);
 
   function draw() {
-    W = cv.width = cv.clientWidth * devicePixelRatio;
-    H = cv.height = cv.clientHeight * devicePixelRatio;
+    const w = cv.clientWidth * devicePixelRatio, h = cv.clientHeight * devicePixelRatio;
+    if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }  // 再確保はサイズ変更時のみ(fps)
+    W = w; H = h;
     ctx.clearRect(0, 0, W, H);
     ctx.font = `${11 * devicePixelRatio}px sans-serif`;
-    // 軸
+    // 軸(下端は条件文バーの上に出す)
     ctx.strokeStyle = "#243040"; ctx.fillStyle = "#7f8ea3";
     for (let t = -10; t <= 10; t += 2) {
-      ctx.beginPath(); ctx.moveTo(X(t), H - 60); ctx.lineTo(X(t), 50); ctx.globalAlpha = .25; ctx.stroke(); ctx.globalAlpha = 1;
-      ctx.fillText((t > 0 ? "+" : "") + t + " Myr", X(t) - 14, H - 40);
+      ctx.beginPath(); ctx.moveTo(X(t), H - 140); ctx.lineTo(X(t), 50); ctx.globalAlpha = .25; ctx.stroke(); ctx.globalAlpha = 1;
+      ctx.fillText((t > 0 ? "+" : "") + t + " Myr", X(t) - 14, H - 120);
     }
     [0.05, 0.1, 0.5, 1, 2, 5].forEach(d => {
       ctx.fillText(d + " pc", 8, Y(d) + 4);
@@ -24,9 +25,16 @@ WAKE.timeline = (() => {
     });
     // 現在線
     ctx.strokeStyle = "#d9a441"; ctx.globalAlpha = .6;
-    ctx.beginPath(); ctx.moveTo(X(WAKE.state.t), H - 60); ctx.lineTo(X(WAKE.state.t), 50); ctx.stroke(); ctx.globalAlpha = 1;
-    // エントリ
+    ctx.beginPath(); ctx.moveTo(X(WAKE.state.t), H - 140); ctx.lineTo(X(WAKE.state.t), 50); ctx.stroke(); ctx.globalAlpha = 1;
+    // エントリ — 色×透明度でグループ化し一括ストローク(パス個別描画は 4fps に落ちる)
     const dep = WAKE.state.departure;
+    const groups = new Map();
+    const G = key => {
+      let g = groups.get(key);
+      if (!g) { g = { ribbons: new Path2D(), dots: new Path2D(), boxes: new Path2D() }; groups.set(key, g); }
+      return g;
+    };
+    const R = 2.4 * devicePixelRatio;
     WAKE.data.cat.entries.forEach(e => {
       const sus = e.rv_faint_suspect_bit5;
       if (sus && !WAKE.state.showSuspect) return;
@@ -35,16 +43,20 @@ WAKE.timeline = (() => {
       const inH = e._inHorizon;
       let col = dep ? (t < WAKE.state.t ? "#8a5a44" : "#6fbf73") : "#9fb6d0";
       if (sus) col = "#e06c75";
-      ctx.globalAlpha = (inH ? 0.85 : 0.25) * (sus ? 0.5 : 1);
-      // CI90 リボン
-      ctx.strokeStyle = col;
-      ctx.beginPath(); ctx.moveTo(X(e.t_ph_myr.ci90[0]), Y(d)); ctx.lineTo(X(e.t_ph_myr.ci90[1]), Y(d)); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(X(t), Y(e.d_ph_pc.ci90[0])); ctx.lineTo(X(t), Y(e.d_ph_pc.ci90[1])); ctx.stroke();
-      ctx.fillStyle = col;
-      if (inH) { ctx.beginPath(); ctx.arc(X(t), Y(d), 2.4 * devicePixelRatio, 0, 7); ctx.fill(); }
-      else { ctx.strokeRect(X(t) - 2, Y(d) - 2, 4, 4); }   // 判定不能=中抜き
-      ctx.globalAlpha = 1;
+      const a = ((inH ? 0.85 : 0.25) * (sus ? 0.5 : 1)).toFixed(3);
+      const g = G(col + "|" + a);
+      const x = X(t), y = Y(d);
+      g.ribbons.moveTo(X(e.t_ph_myr.ci90[0]), y); g.ribbons.lineTo(X(e.t_ph_myr.ci90[1]), y);
+      g.ribbons.moveTo(x, Y(e.d_ph_pc.ci90[0])); g.ribbons.lineTo(x, Y(e.d_ph_pc.ci90[1]));
+      if (inH) { g.dots.moveTo(x + R, y); g.dots.arc(x, y, R, 0, 7); }
+      else g.boxes.rect(x - 2, y - 2, 4, 4);   // 判定不能=中抜き
     });
+    for (const [key, g] of groups) {
+      const [col, a] = key.split("|");
+      ctx.globalAlpha = +a; ctx.strokeStyle = col; ctx.fillStyle = col;
+      ctx.stroke(g.ribbons); ctx.fill(g.dots); ctx.stroke(g.boxes);
+    }
+    ctx.globalAlpha = 1;
     // 有名星
     ctx.fillStyle = "#d9a441";
     for (const [name, e] of Object.entries(WAKE.famous)) {
