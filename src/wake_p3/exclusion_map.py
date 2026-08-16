@@ -145,6 +145,10 @@ def main():
         "theorem_layer": {"legend": ["C2保証(仮定充足∧p·(m1/p)>1.3)",
                                      "定理沈黙(仮定域外 — 判定材料は数値閾値のみ)",
                                      "絶滅側は全域で定理なし(数値・平均場のみ)"],
+                          "numeric_threshold_note": "数値閾値帯: 等方較正 m≈1.0–1.3"
+                              "(E1)/ **実測 ν では m≈1.5–2.0 に上方シフト**"
+                              "(E9 — 非等方性・重い裾は入植を困難にする方向。"
+                              "裁定ログ#14 付帯2)",
                           "isotropization_note": "等方化近似の下での判定(実測 ν は非等方)",
                           "domain": thm},
         "front_direction_sensitivity": {
