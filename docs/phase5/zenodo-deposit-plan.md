@@ -37,7 +37,7 @@
 - シミュレータ公開 URL(確定・付録D 反映済み): https://yukie-lab.github.io/wake-atlas/
 - related_identifiers: 数学論文 DOI 10.5281/zenodo.21955413(isSupplementedBy 系)
   + GitHub リポジトリ/Release(publish 後にメタデータ編集 API で追加)
-  + Jxiv(掲載確定後に追記)
+  + Jxiv: 見送り(裁定#20 裁定2 更新 — ガイドライン 1-3 該当)
 - GitHub: yukie-lab/wake-atlas(既存・空)。gh-pages のみ公開済み(手順2)。
   main push・タグ v1.0-zenodo・Release はリリースコミット後(手順4)。
   注: タグ名 v1.0-zenodo はローカルでは数学論文リリース(3dc9b58)を指すため、
