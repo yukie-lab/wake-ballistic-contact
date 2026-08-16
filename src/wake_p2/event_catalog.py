@@ -34,6 +34,12 @@ N_SURR = 2000
 RV_ERR_MAX = 20.0
 
 
+def _fin(x, nd):
+    """有限値のみ丸めて返す。欠測(NaN/inf)は None = JSON null。"""
+    x = float(x)
+    return round(x, nd) if np.isfinite(x) else None
+
+
 def main():
     cat = dict(np.load(P2 / "catalog_ingested.npz"))
     from wake_data.horizon_eff import effective_horizons
@@ -64,6 +70,8 @@ def main():
             q = int(cat["quarantine_flags"][g]) if "quarantine_flags" in cat else 0
             entries.append({
                 "source_id": int(cat["source_id"][g]),
+                # JS の JSON.parse は 2^53 超を丸めるため、正確な ID は文字列でも供給
+                "source_id_str": str(int(cat["source_id"][g])),
                 "star_index": g,
                 "t_ph_myr": {"median": round(float(np.median(tt)), 4),
                              "ci90": [round(float(np.quantile(tt, 0.05)), 4),
@@ -89,6 +97,17 @@ def main():
                 "rv_faint_suspect_bit5": bool(suspect[g]),
                 "edge_fraction": round(float(ee.mean()), 4),
                 "n_surrogates_in_window": int(len(tt)),
+                # v1.1 追加列(シミュレータ表示用 — 裁定ログ#18 裁定1/3)
+                "astrometry": {
+                    "ra": round(float(cat["ra"][g]), 6),
+                    "dec": round(float(cat["dec"][g]), 6),
+                    "parallax": round(float(cat["parallax"][g]), 4),
+                    "pmra": round(float(cat["pmra"][g]), 4),
+                    "pmdec": round(float(cat["pmdec"][g]), 4),
+                    "rv": round(float(cat["radial_velocity"][g]), 2),
+                    "g_mag": _fin(cat["phot_g_mean_mag"][g], 3),
+                    "bp_rp": _fin(cat["bp_rp"][g], 3),  # 欠測は null(JSON に NaN 禁止)
+                },
             })
     entries.sort(key=lambda e: e["d_ph_pc"]["median"])
 
@@ -117,9 +136,32 @@ def main():
             lam[f"{dmax:.0f}pc"] = round(tot / N_SURR, 3)
         return lam
 
+    # 表示用誤差束(16 サロゲートの太陽中心 6D — 実共分散から生成、裁定#18 裁定1)
+    from wake_p2.run_mc import _surrogates
+    from wake_data.icrs import icrs_to_helio_galactic
+    rngb = np.random.default_rng(20260817)
+    entry_idx = np.array([e["star_index"] for e in entries])
+    N_B = 16
+    # _surrogates は N_SURR 列生成なので、対象星のみ小規模再生成
+    import wake_p2.run_mc as rm
+    saved = rm.N_SURR
+    rm.N_SURR = N_B
+    ra_b, dec_b, plx_b, pmra_b, pmdec_b, rv_b = _surrogates(
+        {k: cat[k] for k in cat}, entry_idx, rngb)
+    rm.N_SURR = saved
+    for i, e in enumerate(entries):
+        okb = plx_b[i] > 0
+        pos_b, vel_b = icrs_to_helio_galactic(
+            ra_b[i][okb], dec_b[i][okb], plx_b[i][okb],
+            pmra_b[i][okb], pmdec_b[i][okb], rv_b[i][okb])
+        e["display_bundle"] = {
+            "note": "16 surrogates, real covariance; linear display propagation",
+            "pos_pc": np.round(pos_b, 3).tolist(),
+            "vel_pc_myr": np.round(vel_b * 1.02271, 4).tolist(),
+        }
     doc = {
-        "schema_version": "v1",
-        "generated": "2026-08-17",
+        "schema_version": "v1.1",
+        "generated": "2026-08-17 (v1.1: +astrometry, +display_bundles)",
         "definition": {
             "window_myr": T_ENV, "n_surrogates": N_SURR,
             "inclusion": "median d_ph < 5 pc within |t|<=13 Myr",
@@ -149,7 +191,8 @@ def main():
         "n_entries": len(entries),
         "entries": entries,
     }
-    OUT.write_text(json.dumps(doc, ensure_ascii=False, indent=1))
+    OUT.write_text(json.dumps(doc, ensure_ascii=False, indent=1,
+                              allow_nan=False))  # NaN 混入は生成時に即エラー
     print(f"カタログ v1: {len(entries)} 星 → {OUT}")
     print("率 [/Myr]:", doc["rates_per_myr"])
     for e in entries[:5]:

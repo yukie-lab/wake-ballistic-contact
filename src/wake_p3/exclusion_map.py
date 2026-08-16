@@ -129,7 +129,8 @@ def main():
         "rate_layers": {
             "clean_primary": {"anchors_1_2_5_pc": anchors_clean,
                               "lam1_ci95": [float(ci1[0]), float(ci1[1])],
-                              "lambda_R": np.round(lamR, 4).tolist(),
+                              "lambda_R": [None if not np.isfinite(x) else x
+                                           for x in np.round(lamR, 4)],  # flag=2 域は null(NaN 禁止)
                               "flags": flagR.tolist(),
                               "flag_legend": {"0": "実測支持", "1": "d²外挿",
                                               "2": "判定不能(R>5)"}},
@@ -173,7 +174,8 @@ def main():
         },
     }
     P3.mkdir(parents=True, exist_ok=True)
-    OUT_JSON.write_text(json.dumps(doc, ensure_ascii=False, indent=1))
+    OUT_JSON.write_text(json.dumps(doc, ensure_ascii=False, indent=1,
+                                   allow_nan=False))  # NaN 混入は生成時に即エラー
 
     # 代表点の f* 表(md)
     lines = ["# 排除地図 v1(裁定ログ#13 三条件実装)", "",

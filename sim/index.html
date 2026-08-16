@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>WAKE — 太陽近傍の来訪統計アトラス</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+:root { --bg:#0b0e14; --fg:#d8dee9; --dim:#7f8ea3; --amber:#d9a441; --line:#243040; }
+* { margin:0; box-sizing:border-box; }
+body { background:var(--bg); color:var(--fg); font:14px/1.5 -apple-system,'Hiragino Sans',sans-serif; overflow:hidden; }
+#app { display:flex; flex-direction:column; height:100vh; }
+header { padding:8px 14px; border-bottom:1px solid var(--line); display:flex; gap:12px; align-items:baseline; flex-wrap:wrap; }
+header h1 { font-size:15px; font-weight:600; letter-spacing:.04em; }
+header .sub { color:var(--dim); font-size:11px; }
+nav { margin-left:auto; display:flex; gap:6px; }
+nav button, .tgl { background:#141a24; color:var(--fg); border:1px solid var(--line); border-radius:6px; padding:4px 10px; font-size:12px; cursor:pointer; }
+nav button.active { border-color:var(--amber); color:var(--amber); }
+#stage { flex:1; position:relative; min-height:0; }
+.view { position:absolute; inset:0; display:none; }
+.view.active { display:block; }
+canvas.fill { width:100%; height:100%; display:block; }
+footer { padding:6px 14px; border-top:1px solid var(--line); font-size:11px; color:var(--dim); display:flex; gap:14px; flex-wrap:wrap; }
+footer b { color:var(--fg); font-weight:600; }
+#fstarMini { position:absolute; right:10px; top:10px; background:#141a24cc; border:1px solid var(--line); border-radius:8px; padding:8px 10px; font-size:11px; cursor:pointer; z-index:5; }
+#fstarMini .v { color:var(--amber); font-size:15px; }
+#harness { padding:16px; overflow:auto; height:100%; }
+#harness table { border-collapse:collapse; font-size:12px; margin-top:8px; }
+#harness td, #harness th { border:1px solid var(--line); padding:4px 10px; }
+.pass { color:#6fbf73; } .fail { color:#e06c75; }
+#sentence { position:absolute; left:10px; bottom:10px; right:220px; background:#141a24d9; border:1px solid var(--line); border-radius:8px; padding:8px 12px; font-size:12px; z-index:5; }
+#ctrl { position:absolute; left:10px; top:10px; background:#141a24cc; border:1px solid var(--line); border-radius:8px; padding:8px 12px; font-size:12px; z-index:5; max-width:290px; }
+#ctrl label { display:block; margin:4px 0 0; color:var(--dim); }
+#ctrl input[type=range] { width:180px; vertical-align:middle; }
+#fps { position:absolute; right:10px; bottom:10px; font-size:10px; color:var(--dim); z-index:5; }
+#undec { position:absolute; right:10px; top:64px; background:#141a24cc; border:1px dashed var(--line); border-radius:8px; padding:6px 10px; font-size:10px; color:var(--dim); z-index:5; max-width:200px; }
+#starInfo { position:absolute; left:10px; bottom:64px; background:#141a24d9; border:1px solid var(--amber); border-radius:8px; padding:8px 12px; font-size:11px; z-index:6; display:none; max-width:300px; }
+</style>
+</head>
+<body>
+<div id="app">
+<header>
+  <h1>WAKE <span style="color:var(--amber)">—</span> 太陽近傍の来訪統計アトラス</h1>
+  <span class="sub">Gaia DR3 実測運動学 / v1</span>
+  <nav>
+    <button data-view="timeline" class="active">航跡タイムライン</button>
+    <button data-view="space">フライバイ網 3D</button>
+    <button data-view="map">排除地図</button>
+    <button id="depTgl" class="tgl">出発モード: OFF</button>
+    <button data-view="harness">検証ハーネス</button>
+  </nav>
+</header>
+<div id="stage">
+  <div class="view active" id="view-timeline"><canvas class="fill" id="tlCanvas"></canvas></div>
+  <div class="view" id="view-space"><canvas class="fill" id="glCanvas"></canvas></div>
+  <div class="view" id="view-map"><canvas class="fill" id="mapCanvas"></canvas></div>
+  <div class="view" id="view-harness"><div id="harness"><h2>検証ハーネス(三点セット監査のシミュレータ側の錨)</h2><div id="harnessBody">読込中…</div></div></div>
+  <div id="fstarMini" title="タップで排除地図へ">f*(R=3.07pc, 過去10Myr, 95%)<br><span class="v">—</span></div>
+  <div id="ctrl"></div>
+  <div id="sentence"></div>
+  <div id="undec"></div>
+  <div id="starInfo"></div>
+  <div id="fps"></div>
+</div>
+<footer>
+  <b>測量であって証明ではない / This is a survey, not a proof</b>
+  <span>母集団: FGK+早中期M(S≥0.05)・完備性補正後・太陽の実測到来率(星平均ではない)</span>
+  <span>クリーンλは下界=安全側</span>
+  <span><a style="color:var(--dim)" href="https://doi.org/10.5281/zenodo.21955413">数学論文 DOI</a></span>
+  <span id="maniLink">MANIFEST: —</span>
+</footer>
+</div>
+<script src="vendor/three.min.js"></script>
+<script src="js/data.js"></script>
+<script src="js/harness.js"></script>
+<script src="js/timeline.js"></script>
+<script src="js/space3d.js"></script>
+<script src="js/map.js"></script>
+<script src="js/departure.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
