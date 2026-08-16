@@ -70,6 +70,34 @@ def main():
                                err_t_halfwidth=np.where(np.isfinite(th), th, np.inf),
                                err_d_halfwidth=np.where(np.isfinite(dh), dh, np.inf))
     md = rep.to_markdown()
+    # 予算超過の層別分類: 統制領域(|t|≤t_h)×接近関連性(d<10 pc)
+    over = rep.budget_frac > 1.0
+    th_def = z["t_h_default"][ok][rep.ok_mask]
+    in_hor = np.abs(rep.t_a) <= th_def
+    close = rep.d_a < 10.0
+    n_over = int(over.sum())
+    n_ctrl = int((over & in_hor & close).sum())
+    n_out_h = int((over & ~in_hor).sum())
+    n_far = int((over & in_hor & ~close).sum())
+    strat = ["## 予算超過の層別分類(統制領域の防護との突き合わせ)", "",
+             f"- 超過 {n_over} 星の内訳: **統制領域内かつ接近関連(|t|≤t_h ∧ "
+             f"d<10 pc): {n_ctrl} 星** / ホライズン外(判定不能領域 — 第5条6項で"
+             f"防護済み): {n_out_h} 星 / 遠方接近(d≥10 pc — 到来統計に無関係): "
+             f"{n_far} 星",
+             "- 解釈: 個別ホライズンは憲法第5条4項の『窓縮小』の星別実装"
+             "(裁定ログ#4(3))。ホライズン外の超過は既に判定不能として分離"
+             "されており、統制領域の主張に触れない。",
+             f"- **判定: 統制領域内の超過 {n_ctrl} 星が 0 なら予算内(統制領域"
+             f"基準)。0 でなければ個別監査+裁定**", ""]
+    if n_ctrl:
+        strat += ["| 統制領域内超過星(上位) | t_a | d_a | 予算比 |", "|---|---|---|---|"]
+        gi = np.flatnonzero(ok)[rep.ok_mask]
+        bad = np.flatnonzero(over & in_hor & close)
+        order = bad[np.argsort(-rep.budget_frac[bad])][:15]
+        for i in order:
+            strat.append(f"| {gi[i]} | {rep.t_a[i]:+.2f} | {rep.d_a[i]:.2f} | "
+                         f"{rep.budget_frac[i]:.1f} |")
+        strat.append("")
     lines = ["# ポテンシャル2種監査 本適用(Phase 2 出口条件)", "",
              f"> 実行: 2026-08-17 / CI半幅ソース: {pathlib.Path(MC_DIR).name} / "
              f"`~/miniforge3/envs/wake/bin/python src/wake_p2/potential_audit.py`",
@@ -77,7 +105,7 @@ def main():
              "## 表引き化の補間誤差監査(potentials.py の添付条件)", "",
              f"- スプライン vs galpy 直接評価: 相対誤差 max {rel_max:.2e}",
              f"- 軌道帰結上界: max|δa|·t²/2 (±10 Myr) ≈ {dd_bound:.3f} mpc",
-             "", md, "",
+             "", md, "", *strat,
              "誤差半幅が NaN(全サロゲート NaN 等)の星は予算比 0 扱い"
              "(比較からは除外されない — 名目差は統計に含む)。", ""]
     OUT.write_text("\n".join(lines))

@@ -24,6 +24,9 @@ class AuditReport:
     dd_pc: np.ndarray         # d_ph 差 (A−B)
     n_edge: int               # どちらかで窓端 (比較除外) の星数
     budget_frac: np.ndarray | None  # |差| / 誤差半幅 (誤差情報がある場合)
+    t_a: np.ndarray | None = None   # 経路A の t_ph (比較星のみ — 層別分類用)
+    d_a: np.ndarray | None = None   # 経路A の d_ph [pc]
+    ok_mask: np.ndarray | None = None  # 入力配列に対する比較マスク
 
     def summary(self) -> dict:
         q = lambda x, p: float(np.percentile(np.abs(x), p)) if len(x) else np.nan
@@ -89,4 +92,5 @@ def dual_potential_audit(pot_a: Potential, pot_b: Potential,
         budget = np.maximum(ft, fd)
     return AuditReport(name_a=pot_a.name, name_b=pot_b.name, n=int(ok.sum()),
                        dt_myr=dt_myr, dd_pc=dd_pc, n_edge=int((~ok).sum()),
-                       budget_frac=budget)
+                       budget_frac=budget, t_a=ea.t_min[ok],
+                       d_a=ea.d_min[ok] * 1e3, ok_mask=ok)
