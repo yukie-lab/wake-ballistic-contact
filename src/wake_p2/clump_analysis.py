@@ -87,7 +87,9 @@ def catalog_level(cat, lines):
 
 def mc_level(cat, pos, vel, ok, lines):
     """1–2. λ(t) 寄与分解と共動判定+既知群照合(新 MC 必要)"""
-    S, th = cat["s_completeness"], cat["t_h_default"]
+    from wake_data.horizon_eff import effective_horizons
+    S = cat["s_completeness"]
+    th, _ = effective_horizons(cat)             # 裁定ログ#11 裁定2
     gi_map = np.flatnonzero(ok)
     inv = -np.ones(len(ok), int)
     inv[gi_map] = np.arange(len(gi_map))

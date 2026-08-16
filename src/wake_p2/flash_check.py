@@ -32,7 +32,9 @@ N_BOOT = 2000
 
 def collect(d_max):
     cat = np.load(P2 / "catalog_ingested.npz")
-    S, th = cat["s_completeness"], cat["t_h_default"]
+    from wake_data.horizon_eff import effective_horizons
+    S = cat["s_completeness"]
+    th, _ = effective_horizons(cat)   # 裁定ログ#11 裁定2: min(t_h, t_pot)
     files = sorted(glob.glob(str(P2 / "mc" / "chunk_*.npz")))
     per_star = {}          # star_global_idx -> (w, past_n, future_n, t_list)
     n_stars = n_undecid_S = 0

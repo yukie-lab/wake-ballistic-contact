@@ -53,7 +53,9 @@ def scan(d_max, t_max, star_mask=None):
 
 def main():
     cat = np.load(P2 / "catalog_ingested.npz")
-    S, th = cat["s_completeness"], cat["t_h_default"]
+    from wake_data.horizon_eff import effective_horizons
+    S = cat["s_completeness"]
+    th, _ = effective_horizons(cat)             # 裁定ログ#11 裁定2
 
     # ---- 規約1: 本機構(G1 と同一定義、±10 Myr) ----
     n1 = {}

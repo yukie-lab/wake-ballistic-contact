@@ -43,8 +43,9 @@ SEED = 88
 def collect():
     """1パスで包絡内イベント表+星台帳を構築"""
     cat = np.load(P2 / "catalog_ingested.npz")
+    from wake_data.horizon_eff import effective_horizons
     S = cat["s_completeness"]
-    th_def, th_sens = cat["t_h_default"], cat["t_h_sens"]
+    th_def, th_sens = effective_horizons(cat)   # 裁定ログ#11 裁定2
     files = sorted(glob.glob(str(P2 / "mc" / "chunk_*.npz")))
     ev = {k: [] for k in ("star", "chunk", "col", "t", "d")}
     stars = {k: [] for k in ("glob", "chunk", "usable")}

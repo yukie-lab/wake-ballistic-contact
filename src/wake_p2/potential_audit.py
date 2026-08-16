@@ -72,11 +72,30 @@ def main():
     md = rep.to_markdown()
     # 予算超過の層別分類: 統制領域(|t|≤t_h)×接近関連性(d<10 pc)
     over = rep.budget_frac > 1.0
-    th_def = z["t_h_default"][ok][rep.ok_mask]
+    from wake_data.horizon_eff import effective_horizons
+    th_eff_all, _ = effective_horizons(z)       # 裁定ログ#11 裁定2(t_pot 込み)
+    th_def = th_eff_all[ok][rep.ok_mask]
     in_hor = np.abs(rep.t_a) <= th_def
     close = rep.d_a < 10.0
     n_over = int(over.sum())
     n_ctrl = int((over & in_hor & close).sum())
+    # 予算判定型 t_pot(裁定ログ#11 裁定2 の実装第2機構): 統制領域内超過星は
+    # 事象時刻の直前で実効ホライズンを打ち切る(モデル系統>測定精度の実測時刻。
+    # 片方向=縮小のみ — 非対称原理)。sidecar に保存し全下流が min に含める
+    side = P2 / "horizon_eff.npz"
+    hz = dict(np.load(side))
+    cap = hz.get("t_budget_cap", np.full(len(z["parallax"]), np.inf))
+    viol_ctrl = over & in_hor & close
+    gi_all = np.flatnonzero(ok)[rep.ok_mask]
+    cap_new = cap.copy()
+    for i in np.flatnonzero(viol_ctrl):
+        g = gi_all[i]
+        cap_new[g] = min(cap_new[g], abs(rep.t_a[i]) * 0.999)
+    hz["t_budget_cap"] = cap_new
+    hz["t_h_eff_default"] = np.minimum(hz["t_h_eff_default"], cap_new)
+    hz["t_h_eff_sens"] = np.minimum(hz["t_h_eff_sens"], cap_new)
+    np.savez_compressed(side, **hz)
+    n_capped = int(np.isfinite(cap_new).sum())
     n_out_h = int((over & ~in_hor).sum())
     n_far = int((over & in_hor & ~close).sum())
     strat = ["## 予算超過の層別分類(統制領域の防護との突き合わせ)", "",
@@ -87,6 +106,10 @@ def main():
              "- 解釈: 個別ホライズンは憲法第5条4項の『窓縮小』の星別実装"
              "(裁定ログ#4(3))。ホライズン外の超過は既に判定不能として分離"
              "されており、統制領域の主張に触れない。",
+             f"- **予算判定型 t_pot(裁定2 第2機構)**: 統制領域内超過星の実効"
+             f"ホライズンを事象時刻直前で打ち切り(累計 cap {n_capped} 星)。"
+             "再監査で統制領域内超過が 0 になることが収束条件 — 打ち切られた"
+             "事象は判定不能へ移る(片方向・縮小のみ)。",
              f"- **判定: 統制領域内の超過 {n_ctrl} 星が 0 なら予算内(統制領域"
              f"基準)。0 でなければ個別監査+裁定**", ""]
     if n_ctrl:

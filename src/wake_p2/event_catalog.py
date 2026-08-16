@@ -35,8 +35,13 @@ RV_ERR_MAX = 20.0
 
 
 def main():
-    cat = np.load(P2 / "catalog_ingested.npz")
+    cat = dict(np.load(P2 / "catalog_ingested.npz"))
+    from wake_data.horizon_eff import effective_horizons
+    eff_d, eff_s = effective_horizons(cat)      # 裁定ログ#11 裁定2
+    cat["t_h_default"], cat["t_h_sens"] = eff_d, eff_s
     S = cat["s_completeness"]
+    b5 = np.load(P2 / "quarantine_bit5.npz")    # 裁定ログ#11 裁定1
+    suspect = b5["mask"]
     files = sorted(glob.glob(str(P2 / "mc" / "chunk_*.npz")))
     entries = []
     n_total = 0
@@ -55,8 +60,8 @@ def main():
             s_val = float(S[g]) if np.isfinite(S[g]) else None
             usable = s_val is not None and s_val >= S_FLOOR
             th_d = float(cat["t_h_default"][g])
-            rv_err = float(cat["rv_error"][g]) if "rv_error" in cat.files else None
-            q = int(cat["quarantine_flags"][g]) if "quarantine_flags" in cat.files else 0
+            rv_err = float(cat["rv_error"][g]) if "rv_error" in cat else None
+            q = int(cat["quarantine_flags"][g]) if "quarantine_flags" in cat else 0
             entries.append({
                 "source_id": int(cat["source_id"][g]),
                 "star_index": g,
@@ -77,16 +82,18 @@ def main():
                                if usable else None),
                 "undecidable_S": not usable,
                 "rv_error_kms": None if rv_err is None else round(rv_err, 2),
-                "excluded_from_event_judgement": (rv_err is not None
-                                                  and rv_err > RV_ERR_MAX),
+                "excluded_from_event_judgement": bool(
+                    (rv_err is not None and rv_err > RV_ERR_MAX)
+                    or suspect[g]),
                 "quarantine_bits": q,
+                "rv_faint_suspect_bit5": bool(suspect[g]),
                 "edge_fraction": round(float(ee.mean()), 4),
                 "n_surrogates_in_window": int(len(tt)),
             })
     entries.sort(key=lambda e: e["d_ph_pc"]["median"])
 
     # 率サマリ(G1 と同定義の露出正規化、uncorrected = w≡1)
-    def rates(weighted):
+    def rates(weighted, clean):
         th = cat["t_h_default"]
         lam = {}
         for dmax in (1.0, 2.0, 5.0):
@@ -97,6 +104,8 @@ def main():
                 t_ph, d_ph, edge = z["t_ph"], z["d_ph"], z["edge"]
                 s_c = S[idx]
                 usable = np.isfinite(s_c) & (s_c >= S_FLOOR)
+                if clean:
+                    usable &= ~suspect[idx]
                 w = np.where(usable, 1.0 / np.maximum(s_c, S_FLOOR), 0.0) \
                     if weighted else usable.astype(float)
                 e = 2.0 * np.minimum(10.0, np.maximum(th[idx], 1e-9))
@@ -110,20 +119,28 @@ def main():
 
     doc = {
         "schema_version": "v1",
-        "generated": "2026-08-16",
+        "generated": "2026-08-17",
         "definition": {
             "window_myr": T_ENV, "n_surrogates": N_SURR,
             "inclusion": "median d_ph < 5 pc within |t|<=13 Myr",
             "rate_estimator": "exposure-normalized (2*min(10, t_h) per star), "
                               "control region S>=floor & in-horizon",
-            "notes": ["窓外縁・S<floor は判定不能(憲法第5条6項)",
+            "notes": ["露出規約 = 星ごとの有効露出 2·min(10 Myr, t_h_eff)、"
+                      "t_h_eff = min(測定ホライズン, t_pot) — 裁定ログ#11 裁定2"
+                      "(追加指示 §5 の明記要件)",
+                      "bit5 rv_faint_suspect(G>13.5 ∧ |RV|>150)は個別イベント"
+                      "判定から除外・率は両建て報告 — 裁定ログ#11 裁定1",
+                      "窓外縁・S<floor は判定不能(憲法第5条6項)",
                       "rv_error>20 km/s は個別イベント判定から除外・率には寄与"
                       "(裁定ログ#4(5))",
                       "corrected 版は IPW(gaiaunlimited DR3 RVS 選択関数、"
                       "s_floor=0.05 — 裁定ログ#8)"],
         },
-        "rates_per_myr": {"uncorrected": rates(False),
-                          "ipw_corrected": rates(True)},
+        "rates_per_myr": {
+            "clean": {"uncorrected": rates(False, True),
+                      "ipw_corrected": rates(True, True)},
+            "including_rv_faint_suspect": {"uncorrected": rates(False, False),
+                                           "ipw_corrected": rates(True, False)}},
         "n_catalog": n_total,
         "n_entries": len(entries),
         "entries": entries,
