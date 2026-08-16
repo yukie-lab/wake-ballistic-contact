@@ -17,7 +17,10 @@ WAKE.timeline = (() => {
     ctx.strokeStyle = "#243040"; ctx.fillStyle = "#7f8ea3";
     for (let t = -10; t <= 10; t += 2) {
       ctx.beginPath(); ctx.moveTo(X(t), H - 140); ctx.lineTo(X(t), 50); ctx.globalAlpha = .25; ctx.stroke(); ctx.globalAlpha = 1;
-      ctx.fillText((t > 0 ? "+" : "") + t + " Myr", X(t) - 14, H - 120);
+      const lbl = (t > 0 ? "+" : "") + t + " Myr";
+      // 右端ラベルの見切れ防止(美学レビュー指摘)
+      const lx = Math.min(X(t) - 14, W - ctx.measureText(lbl).width - 4 * devicePixelRatio);
+      ctx.fillText(lbl, lx, H - 120);
     }
     [0.05, 0.1, 0.5, 1, 2, 5].forEach(d => {
       ctx.fillText(d + " pc", 8, Y(d) + 4);

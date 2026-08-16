@@ -95,7 +95,12 @@ WAKE.map = (() => {
     ctx.stroke(); ctx.lineWidth = 1;
     // 軸・注記
     ctx.fillStyle = "#7f8ea3";
-    [0.1, 0.3, 1, 3.07, 5, 10].forEach(R => ctx.fillText(R + " pc", RX(R) - 10, H - 220));
+    [0.1, 0.3, 1, 3.07, 5, 10].forEach(R => {
+      const lbl = R + " pc";
+      // 右端ラベルの見切れ防止(美学レビュー指摘)
+      const lx = Math.min(RX(R) - 10, W - ctx.measureText(lbl).width - 4 * devicePixelRatio);
+      ctx.fillText(lbl, lx, H - 220);
+    });
     [1e-4, 1e-3, 1e-2, 1e-1, 1].forEach(f => ctx.fillText(f.toExponential(0), 12, FY(f) + 4));
     // 凡例は f* ミニ表示・判定不能パネル(DOM, css 高 ~225px)の下に出す
     const lx = W - 450 * devicePixelRatio, ly = 245 * devicePixelRatio,
