@@ -9,10 +9,10 @@ WAKE.map = (() => {
   function layerAnchors() {
     const m = WAKE.data.map.rate_layers;
     if (WAKE.state.layer === "bridge")
-      return { mul: m.bridge_reference.factor, name: "橋 ×5.3 参考(モデル明示)" };
+      return { mul: m.bridge_reference.factor, name: WAKE.t("layerBridge") };
     if (WAKE.state.layer === "suspect")
-      return { mul: null, name: "suspect 込み(両建て)" };
-    return { mul: 1, name: "クリーン主計算(下界=安全側)" };
+      return { mul: null, name: WAKE.t("layerSuspect") };
+    return { mul: 1, name: WAKE.t("layerClean") };
   }
 
   function lambdaFor(R) {
@@ -77,15 +77,16 @@ WAKE.map = (() => {
     ctx.fillStyle = "#7f8ea3";
     [0.1, 0.3, 1, 3.07, 5, 10].forEach(R => ctx.fillText(R + " pc", RX(R) - 10, H - 50));
     [1e-4, 1e-3, 1e-2, 1e-1, 1].forEach(f => ctx.fillText(f.toExponential(0), 12, FY(f) + 4));
-    ctx.fillStyle = "#d9a441"; ctx.fillText("訪問済みのはず(琥珀)", W - 260, 70);
-    ctx.fillStyle = "#9fb6d0"; ctx.fillText("沈黙と整合(夜空)", W - 260, 90);
-    ctx.fillStyle = "#aab"; ctx.fillText("明琥珀=C2 定理保証域(等方化近似・E9 閾値 m>2.0)", W - 420, 110);
-    ctx.fillStyle = "#39404a"; ctx.fillRect(W - 280, 122, 12, 12);
-    ctx.fillStyle = "#7f8ea3"; ctx.fillText("判定不能(R>5 / τ≥10)", W - 260, 132);
+    const lx = W - 460 * devicePixelRatio / 2;
+    ctx.fillStyle = "#d9a441"; ctx.fillText(WAKE.t("mapVisited"), lx, 70);
+    ctx.fillStyle = "#9fb6d0"; ctx.fillText(WAKE.t("mapSilent"), lx, 90);
+    ctx.fillStyle = "#aab"; ctx.fillText(WAKE.t("mapTheorem"), lx, 110);
+    ctx.fillStyle = "#39404a"; ctx.fillRect(lx - 18, 122, 12, 12);
+    ctx.fillStyle = "#7f8ea3"; ctx.fillText(WAKE.t("mapUndec"), lx, 132);
     const dash = RX(3.07);
     ctx.strokeStyle = "#d8dee9"; ctx.setLineDash([4, 4]); ctx.beginPath();
     ctx.moveTo(dash, 50); ctx.lineTo(dash, H - 70); ctx.stroke(); ctx.setLineDash([]);
-    ctx.fillStyle = "#d8dee9"; ctx.fillText("CN19 標準 R=3.07", dash + 4, 62);
+    ctx.fillStyle = "#d8dee9"; ctx.fillText(WAKE.t("mapCN19"), dash + 4, 62);
   }
 
   function sentence() {
@@ -93,11 +94,13 @@ WAKE.map = (() => {
     const fs = WAKE.fstar(3.07, v);
     const layer = layerAnchors();
     const th = WAKE.data.map.theorem_layer;
-    return `【条件付き確率文(JSON テンプレート)】` +
-      WAKE.data.map.conditional_statement_template +
-      ` — 現在値: ${layer.name}・R=3.07 pc・v=${v} km/s → f* = ` +
-      `${fs.fstar ? fs.fstar.toExponential(1) : "—"}(クリーン λ は下界=安全側)。` +
-      `L=${L} Myr の定理判定は三値凡例。${th.isotropization_note} ${th.numeric_threshold_note}`;
+    const t = WAKE.t;
+    return t("sentPrefix") +
+      WAKE.jsonText(WAKE.data.map, "conditional_statement_template") +
+      `${t("sentNow")}${layer.name} / R=3.07 pc / v=${v} km/s${t("sentFs")}` +
+      `${fs.fstar ? fs.fstar.toExponential(1) : "—"}${t("sentSafe")}` +
+      `${t("sentTheorem")}${L}${t("sentTheoremTail")}` +
+      `${WAKE.jsonText(th, "isotropization_note")} ${WAKE.jsonText(th, "numeric_threshold_note")}`;
   }
   return { draw, sentence };
 })();

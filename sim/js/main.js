@@ -1,7 +1,7 @@
-/* 配線 — ビュー切替・時間再生・fps・憲法制約の常時表示 */
+/* 配線 — ビュー切替・時間再生・fps・言語切替・憲法制約の常時表示 */
 (async () => {
   await WAKE.loadAll();
-  const harnessOK = await WAKE.runHarness();
+  let harnessOK = await WAKE.runHarness();
   WAKE.space.init();
 
   const views = ["timeline", "space", "map", "harness"];
@@ -16,30 +16,43 @@
     b.addEventListener("click", () => WAKE.showView(b.dataset.view)));
   document.getElementById("depTgl").addEventListener("click", () => {
     WAKE.state.departure = !WAKE.state.departure;
-    document.getElementById("depTgl").textContent = "出発モード: " + (WAKE.state.departure ? "ON" : "OFF");
+    renderDepTgl();
     renderCtrl();
+  });
+  document.getElementById("langTgl").addEventListener("click", async () => {
+    WAKE.state.lang = WAKE.state.lang === "en" ? "ja" : "en";
+    await applyLang();
   });
   document.getElementById("fstarMini").addEventListener("click", () => WAKE.showView("map"));
   const fs0 = WAKE.fstar(3.07, 10);
-  document.querySelector("#fstarMini .v").textContent = fs0.fstar.toExponential(1);
+
+  function renderDepTgl() {
+    document.getElementById("depTgl").textContent =
+      WAKE.t("dep") + ": " + (WAKE.state.departure ? "ON" : "OFF");
+  }
 
   function renderCtrl() {
     const c = document.getElementById("ctrl");
-    const s = WAKE.state;
-    let html = `<label><input type="checkbox" id="cSus" ${s.showSuspect ? "checked" : ""}> bit5 suspect を表示(両建て)</label>`;
+    const s = WAKE.state, t = WAKE.t;
+    // ハーネス画面は数値監査専用 — 操作パネル・条件文を出さない(錨の被り防止)
+    const onHarness = s.view === "harness";
+    c.style.display = onHarness ? "none" : "block";
+    document.getElementById("sentence").style.display = onHarness ? "none" : "block";
+    if (onHarness) return;
+    let html = `<label><input type="checkbox" id="cSus" ${s.showSuspect ? "checked" : ""}> ${t("cSuspect")}</label>`;
     if (s.view !== "map") html += `
-      <label>時刻 t = <b id="tVal">${s.t.toFixed(2)}</b> Myr</label>
+      <label>${t("cTime")}<b id="tVal">${s.t.toFixed(2)}</b> Myr</label>
       <input type="range" id="cT" min="-10" max="10" step="0.02" value="${s.t}">
-      <button class="tgl" id="cPlay">${s.playing ? "⏸ 停止" : "▶ 再生"}</button>`;
+      <button class="tgl" id="cPlay">${s.playing ? t("cPause") : t("cPlay")}</button>`;
     if (s.view === "map") html += `
-      <label>探査機速度 v = <b>${s.v_kms}</b> km/s</label>
+      <label>${t("cV")}<b>${s.v_kms}</b> km/s</label>
       <input type="range" id="cV" min="0.5" max="2.5" step="0.05" value="${Math.log10(s.v_kms)}">
-      <label>寿命 L = <b>${s.L_myr}</b> Myr(定理レイヤ)</label>
+      <label>${t("cL")}<b>${s.L_myr}</b>${t("cLTail")}</label>
       <input type="range" id="cL" min="-2" max="2" step="0.1" value="${Math.log10(s.L_myr)}">
-      <label>レイヤ: <select id="cLayer">
-        <option value="clean" ${s.layer === "clean" ? "selected" : ""}>クリーン主計算</option>
-        <option value="bridge" ${s.layer === "bridge" ? "selected" : ""}>橋 ×5.3 参考</option>
-        <option value="suspect" ${s.layer === "suspect" ? "selected" : ""}>suspect 込み</option>
+      <label>${t("cLayer")}<select id="cLayer">
+        <option value="clean" ${s.layer === "clean" ? "selected" : ""}>${t("layerClean")}</option>
+        <option value="bridge" ${s.layer === "bridge" ? "selected" : ""}>${t("layerBridge")}</option>
+        <option value="suspect" ${s.layer === "suspect" ? "selected" : ""}>${t("layerSuspect")}</option>
       </select></label>`;
     if (s.departure) html += `<div style="margin-top:6px;border-top:1px solid var(--line);padding-top:6px">${WAKE.departure.info()}</div>`;
     c.innerHTML = html;
@@ -53,17 +66,39 @@
     if (pl) pl.addEventListener("click", () => { s.playing = !s.playing; renderCtrl(); });
   }
 
-  // 判定不能パネル(常時 — 憲法)
-  const cat = WAKE.data.cat;
-  const nSus = cat.entries.filter(e => e.rv_faint_suspect_bit5).length;
-  const nOut = cat.entries.filter(e => !e._inHorizon).length;
-  const nSfl = cat.entries.filter(e => e.undecidable_S).length;
-  const nExc = cat.entries.filter(e => e.excluded_from_event_judgement).length;
-  document.getElementById("undec").innerHTML =
-    `<b>判定不能の会計(常時表示・全数 ${cat.n_entries} エントリ)</b>` +
-    `<br>S&lt;floor(判定不能): ${nSfl}<br>ホライズン外: ${nOut}` +
-    `<br>bit5 suspect: ${nSus}(両建て)<br>個別判定除外(rv_error等): ${nExc}` +
-    `<br>R&gt;5 pc・τ≥10 Myr: 地図で灰色`;
+  // 判定不能パネル(常時 — 憲法。数値は全て JSON 由来のカウント)
+  function renderUndec() {
+    const cat = WAKE.data.cat, t = WAKE.t;
+    const nSus = cat.entries.filter(e => e.rv_faint_suspect_bit5).length;
+    const nOut = cat.entries.filter(e => !e._inHorizon).length;
+    const nSfl = cat.entries.filter(e => e.undecidable_S).length;
+    const nExc = cat.entries.filter(e => e.excluded_from_event_judgement).length;
+    document.getElementById("undec").innerHTML =
+      `<b>${t("undTitle")}${cat.n_entries}${t("undTitleTail")}</b>` +
+      `<br>${t("undSfloor")}${nSfl}<br>${t("undHorizon")}${nOut}` +
+      `<br>${t("undBit5")}${nSus}${t("undBit5Tail")}<br>${t("undExcluded")}${nExc}` +
+      `<br>${t("undGray")}`;
+  }
+
+  async function applyLang() {
+    const t = WAKE.t;
+    document.documentElement.lang = WAKE.state.lang;
+    document.title = t("title");
+    document.querySelectorAll("[data-i18n]").forEach(el => { el.textContent = t(el.dataset.i18n); });
+    document.getElementById("langTgl").textContent = t("langBtn");
+    document.getElementById("fstarMini").title = t("fstarTip");
+    document.getElementById("maniLink").textContent =
+      t("maniPrefix") + WAKE._maniCount + t("maniNote");
+    renderDepTgl();
+    renderCtrl();
+    renderUndec();
+    WAKE.space.refreshInfo();
+    harnessOK = await WAKE.runHarness();   // 表の文言を現言語で再構築(数値検査も再実行)
+  }
+  WAKE.applyLang = applyLang;
+
+  document.querySelector("#fstarMini .v").textContent = fs0.fstar.toExponential(1);
+  await applyLang();
 
   // ループ
   let last = performance.now(), frames = 0, fpsAt = last;
@@ -80,12 +115,11 @@
     if (v === "timeline") WAKE.timeline.draw();
     if (v === "space") WAKE.space.frame();
     if (v === "map") { WAKE.map.draw(); document.getElementById("sentence").textContent = WAKE.map.sentence(); }
-    else document.getElementById("sentence").textContent =
-      "条件付き確率文は排除地図ビューでスライダー値から動的に組み立てられます。";
+    else document.getElementById("sentence").textContent = WAKE.t("sentPointer");
     frames++;
     if (now - fpsAt > 1000) {
       document.getElementById("fps").textContent =
-        `${frames} fps / ハーネス: ${harnessOK ? "PASS" : "FAIL"}`;
+        `${frames} fps / ${WAKE.t("navHarness")}: ${harnessOK ? WAKE.t("pass") : WAKE.t("fail")}`;
       WAKE._fps = frames; frames = 0; fpsAt = now;
     }
     requestAnimationFrame(loop);

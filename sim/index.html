@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="en">
 <head>
 <meta charset="utf-8">
-<title>WAKE — 太陽近傍の来訪統計アトラス</title>
+<title>WAKE — a visitation-statistics atlas of the solar neighbourhood</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
 :root { --bg:#0b0e14; --fg:#d8dee9; --dim:#7f8ea3; --amber:#d9a441; --line:#243040; }
@@ -39,22 +39,23 @@ footer b { color:var(--fg); font-weight:600; }
 <body>
 <div id="app">
 <header>
-  <h1>WAKE <span style="color:var(--amber)">—</span> 太陽近傍の来訪統計アトラス</h1>
-  <span class="sub">Gaia DR3 実測運動学 / v1</span>
+  <h1>WAKE <span style="color:var(--amber)">—</span> <span data-i18n="h1sub">a visitation-statistics atlas of the solar neighbourhood</span></h1>
+  <span class="sub" data-i18n="sub">Gaia DR3 measured kinematics / v1</span>
   <nav>
-    <button data-view="timeline" class="active">航跡タイムライン</button>
-    <button data-view="space">フライバイ網 3D</button>
-    <button data-view="map">排除地図</button>
-    <button id="depTgl" class="tgl">出発モード: OFF</button>
-    <button data-view="harness">検証ハーネス</button>
+    <button data-view="timeline" class="active" data-i18n="navTimeline">Wake timeline</button>
+    <button data-view="space" data-i18n="navSpace">Flyby network 3D</button>
+    <button data-view="map" data-i18n="navMap">Exclusion map</button>
+    <button id="depTgl" class="tgl">Departure mode: OFF</button>
+    <button data-view="harness" data-i18n="navHarness">Verification harness</button>
+    <button id="langTgl" class="tgl">日本語</button>
   </nav>
 </header>
 <div id="stage">
   <div class="view active" id="view-timeline"><canvas class="fill" id="tlCanvas"></canvas></div>
   <div class="view" id="view-space"><canvas class="fill" id="glCanvas"></canvas></div>
   <div class="view" id="view-map"><canvas class="fill" id="mapCanvas"></canvas></div>
-  <div class="view" id="view-harness"><div id="harness"><h2>検証ハーネス(三点セット監査のシミュレータ側の錨)</h2><div id="harnessBody">読込中…</div></div></div>
-  <div id="fstarMini" title="タップで排除地図へ">f*(R=3.07pc, 過去10Myr, 95%)<br><span class="v">—</span></div>
+  <div class="view" id="view-harness"><div id="harness"><h2 data-i18n="harnessTitle">Verification harness (the simulator-side anchor of the three-artifact audit)</h2><div id="harnessBody">loading…</div></div></div>
+  <div id="fstarMini"><span data-i18n="fstarLabel">f* (R=3.07 pc, past 10 Myr, 95%)</span><br><span class="v">—</span></div>
   <div id="ctrl"></div>
   <div id="sentence"></div>
   <div id="undec"></div>
@@ -63,14 +64,15 @@ footer b { color:var(--fg); font-weight:600; }
 </div>
 <footer>
   <b>測量であって証明ではない / This is a survey, not a proof</b>
-  <span>母集団: FGK+早中期M(S≥0.05)・完備性補正後・太陽の実測到来率(星平均ではない)</span>
-  <span>クリーンλは下界=安全側</span>
-  <span><a style="color:var(--dim)" href="https://doi.org/10.5281/zenodo.21955413">数学論文 DOI</a></span>
+  <span data-i18n="ftPop">Population: FGK + early-to-mid M (S≥0.05), completeness-corrected, the Sun's measured arrival rate (not a stellar average)</span>
+  <span data-i18n="ftSafe">clean λ is a lower bound = the conservative direction</span>
+  <span><a style="color:var(--dim)" href="https://doi.org/10.5281/zenodo.21955413" data-i18n="ftDoi">math paper DOI</a></span>
   <span id="maniLink">MANIFEST: —</span>
 </footer>
 </div>
 <script src="vendor/three.min.js"></script>
 <script src="js/data.js"></script>
+<script src="js/i18n.js"></script>
 <script src="js/harness.js"></script>
 <script src="js/timeline.js"></script>
 <script src="js/space3d.js"></script>

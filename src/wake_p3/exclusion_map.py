@@ -118,8 +118,23 @@ def main():
             "N_vis = f·⟨p̂⟩/f·λ(R)·max(0, 10−R/v) > 3 を満たすなら、過去 10 Myr に"
             "太陽系は訪問済みのはず(沈黙は 95% で棄却)。N_vis ≤ 3 は沈黙と整合。"
             "R > 5 pc・τ ≥ 10 Myr・晩期 M 等 S<floor の寄与は判定不能。"),
+        "conditional_statement_template_en": (
+            "Under the completeness-corrected arrival rate of the FGK + "
+            "early-to-mid M population (S≥0.05), measured for the Sun (not a "
+            "stellar average): if the region of settled fraction f, probe "
+            "range R, lifetime L, and probe speed v satisfies "
+            "N_vis = f·⟨p̂⟩/f·λ(R)·max(0, 10−R/v) > 3, the solar system "
+            "should have been visited within the past 10 Myr (silence "
+            "rejected at 95%). N_vis ≤ 3 is consistent with silence. "
+            "Contributions from R > 5 pc, τ ≥ 10 Myr, and S<floor "
+            "populations (late M, etc.) are undecidable."),
         "safety_note": "クリーン λ は物理的遭遇率の下界(探査機は Gaia 選択関数に"
                        "従わない)→「訪問済みのはず」領域が縮む = 主張は安全側",
+        "safety_note_en": ("The clean λ is a lower bound on the physical "
+                           "encounter rate (probes do not obey the Gaia "
+                           "selection function) → the 'should have been "
+                           "visited' region shrinks = claims are "
+                           "conservative"),
         "n_crit_convention": "N_vis = f·⟨p̂⟩/f·λ(R)·T_eff ≥ 3 ⇔ "
                              "P(≥1 訪問) = 1−e^{−N} ≥ 95%(Poisson 規約 — "
                              "裁定ログ#14 付帯1)",
@@ -157,6 +172,23 @@ def main():
                               "(E9 — 非等方性・重い裾は入植を困難にする方向。"
                               "裁定ログ#14 付帯2)",
                           "isotropization_note": "等方化近似の下での判定(実測 ν は非等方)",
+                          "legend_en": ["C2-guaranteed (assumptions satisfied "
+                                        "∧ p·(m1/p)>2.0 — conservative end of "
+                                        "the E9 measured-ν band 1.5–2.0)",
+                                        "Theorem-silent (outside the "
+                                        "assumption domain — only numerical "
+                                        "thresholds inform)",
+                                        "No extinction-side theorem anywhere "
+                                        "(numerics and mean-field only)"],
+                          "numeric_threshold_note_en": (
+                              "Numerical threshold band: isotropic "
+                              "calibration m≈1.0–1.3 (E1) / shifts upward to "
+                              "m≈1.5–2.0 under the measured ν (E9 — "
+                              "anisotropy and heavy tails hinder settlement; "
+                              "ruling #14 rider 2)"),
+                          "isotropization_note_en": (
+                              "Judged under the isotropization approximation "
+                              "(the measured ν is anisotropic)"),
                           "domain": thm},
         "front_direction_sensitivity": {
             "beta": 2.5, "s0": 0.0, "n_dirs": 48,

@@ -52,14 +52,14 @@ WAKE.timeline = (() => {
     }
     // ショルツ星(カタログ外・G3公刊アンカー — 実装指示書#18 裁定2の注記値)
     ctx.fillStyle = dep ? "#8a5a44" : "#7f8ea3";
-    ctx.fillText("ショルツ星(公刊値・DR3外: −0.07 Myr, 0.25 pc)" +
-      (dep ? " — 人類が見送った便" : ""), X(-0.07) + 6, Y(0.25) + 14);
+    ctx.fillText(WAKE.t("tlScholz") + (dep ? WAKE.t("tlScholzDep") : ""),
+      X(-0.07) + 6, Y(0.25) + 14);
     ctx.strokeStyle = ctx.fillStyle;
     ctx.strokeRect(X(-0.07) - 3, Y(0.25) - 3, 6, 6);
     // 凡例
     ctx.fillStyle = "#7f8ea3";
-    ctx.fillText("● ホライズン内(統制領域) □ ホライズン外=判定不能 ■赤 bit5 suspect(トグル)", 60, 30);
-    if (dep) ctx.fillText("出発モード: 茶=出発済みの便(乗り損ね) 緑=乗車可能便", 60 + 480 * devicePixelRatio / 2, 30);
+    ctx.fillText(WAKE.t("tlLegend"), 60, 30);
+    if (dep) ctx.fillText(WAKE.t("tlDepLegend"), 60, 30 + 16 * devicePixelRatio);
   }
   cv.addEventListener("click", ev => {
     const r = cv.getBoundingClientRect();

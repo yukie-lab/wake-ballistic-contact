@@ -43,8 +43,7 @@ WAKE.loadAll = async function () {
     if (Teff <= 0) return { fstar: null, flag: 3 };
     return { fstar: 3.0 / (lam * Teff), flag };
   };
-  document.getElementById("maniLink").textContent =
-    "MANIFEST: " + Object.keys(mani.files).length + " files (sha256 検証はハーネス)";
+  WAKE._maniCount = Object.keys(mani.files).length;   // 表示は applyLang(main.js)
   return WAKE.data;
 };
 

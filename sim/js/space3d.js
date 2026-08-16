@@ -90,9 +90,9 @@ WAKE.space = (() => {
     scene.add(pathLine);
     const info = document.getElementById("starInfo");
     info.style.display = "block";
-    info.innerHTML = `<b>最小乗換経路(網 v1)</b><br>` +
-      `離脱 Δv = ${bp.best_transfer_dv_kms} km/s → d ≤ 0.1 pc 通過へ<br>` +
-      `<span style="color:var(--dim)">辺は flyby_network_v1 の読み替えのみ(新規軌道計算なし)</span>`;
+    info.innerHTML = `<b>${WAKE.t("siTitle")}</b><br>` +
+      `${WAKE.t("siDv")}${bp.best_transfer_dv_kms}${WAKE.t("siDvTail")}<br>` +
+      `<span style="color:var(--dim)">${WAKE.t("siNote")}</span>`;
   }
 
   function frame() {
@@ -105,5 +105,5 @@ WAKE.space = (() => {
     if (cv.width !== w * devicePixelRatio) { renderer.setSize(w, h, false); cam.aspect = w / h; cam.updateProjectionMatrix(); }
     renderer.render(scene, cam);
   }
-  return { init, frame };
+  return { init, frame, refreshInfo: () => { if (entries) drawBestPath(); } };
 })();
