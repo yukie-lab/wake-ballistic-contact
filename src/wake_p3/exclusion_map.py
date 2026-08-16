@@ -120,6 +120,9 @@ def main():
             "R > 5 pc・τ ≥ 10 Myr・晩期 M 等 S<floor の寄与は判定不能。"),
         "safety_note": "クリーン λ は物理的遭遇率の下界(探査機は Gaia 選択関数に"
                        "従わない)→「訪問済みのはず」領域が縮む = 主張は安全側",
+        "n_crit_convention": "N_vis = f·⟨p̂⟩/f·λ(R)·T_eff ≥ 3 ⇔ "
+                             "P(≥1 訪問) = 1−e^{−N} ≥ 95%(Poisson 規約 — "
+                             "裁定ログ#14 付帯1)",
         "axes": {"R_pc": R_grid.tolist(), "v_kms": v_grid.tolist(),
                  "f": "連続(N_vis 線形 — f* 境界で表現)",
                  "L_myr": "定理レイヤの T_s 軸(訪問数 v1 は L 非依存 — 支持窓 10 Myr)"},
