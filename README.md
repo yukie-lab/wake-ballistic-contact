@@ -1,48 +1,69 @@
-# Contact processes on ballistic Poisson particles
+# WAKE: a visitation-statistics atlas of the solar neighbourhood
 
-**Criticality, fronts, and when motion helps colonization**
+**Arrival statistics, an exclusion map, and a flyby network on Gaia DR3 kinematics**
 
-Yukie Maeda ([ORCID 0009-0005-3401-9230](https://orcid.org/0009-0005-3401-9230))
+Yukie Maeda ([ORCID 0009-0005-3401-9230](https://orcid.org/0009-0005-3401-9230)) — Independent Researcher, Tokyo
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21955413.svg)](https://doi.org/10.5281/zenodo.21955413)
+<!-- DOI badge inserted at the Zenodo release commit -->
 
-We introduce a contact process on particles moving ballistically in R³
-(Poisson points with i.i.d. velocities; entry-driven fire-and-forget
-transmission at range R, pair-once, Exp(T_s) lifetimes, re-marking allowed)
-and establish its critical structure: a spectral extinction theorem (A); the
-failure of the branching-type bound under re-marking via a certified 4.4σ
-"reverse channel" (§4); the static-limit equivalence with bond-diluted
-random geometric graph percolation (B); a survival theorem for the full
-model proved by a cell–relay renormalization with machine-certified
-geometry (C2); the consequence that sufficiently fast motion enables
-colonization at densities where static geometry forbids it (D); and a
-superlinear/linear front dichotomy (C6a/C6b′). Numerically, whether motion
-helps at all is shown to depend on the transmission convention. Full
-preprint (with the complete verification disclosure): see the DOI above.
+Should we have been visited? This repository carries the full WAKE atlas:
+the bilingual paper (English authoritative, Japanese translation), the
+released data set, and the browser simulator.
 
-## Reproduce
+- **Paper**: `docs/phase5/paper/wake_en.pdf` / `wake_ja.pdf`
+- **Data**: `data/release/` — `arrival_catalog_v1.json` (2,197 arrival
+  events, schema v1.1), `exclusion_map_v1.json` (v1.0.1),
+  `flyby_network_v1.json`, with a SHA-256 `MANIFEST.json`
+- **Simulator**: https://yukie-lab.github.io/wake-atlas/ — reads exactly the
+  released JSONs; its first artifact is a 16-check verification harness
+  (paper numbers + SHA-256 digests) shown before any visualization
+
+## Headline numbers (conditional statements over a declared population)
+
+- Clean arrival rate λ(1 pc) = 4.5 (+4.0/−2.7) per Myr (FGK + early-M,
+  completeness-corrected); the published factor-of-two split is dominated by
+  completeness-target population choices, not data quality
+- Exclusion map: f* = 5.0×10⁻³ at the standard probe range of 3.07 pc —
+  above that settled fraction, the solar system should have been visited
+  within the past 10 Myr (silence rejected at 95%)
+- Flyby network: a propellant-minimal visiting route exists at all times,
+  Δv ≈ 5.8 km/s (single transfer)
+
+This is surveying, not proof: every statement is a conditional probability
+statement, and undecidable regions are reported as undecidable.
+
+## Reproduction
 
 ```bash
-python3 src/wake_r/geo_verify.py            # machine certification (geometry + normalization bridge)
-python3 src/wake_r/paper_figs.py            # regenerate the three paper figures
-python3 scripts/verify_refs.py docs/phase-r/paper/refs.bib   # bibliography resolution check
+conda env create -f environment.yml && conda activate wake
+python3 src/wake_p2/event_catalog.py     # arrival catalogue
+python3 src/wake_p3/exclusion_map.py     # exclusion map
+python3 src/wake_p4/flyby_network.py     # flyby network
+python3 src/wake_p5/paper_figs_main.py   # all five figures
+python3 scripts/gate_check_paper.py      # 7 quality gates
+python3 scripts/audit_three_artifacts.py # paper<->data<->simulator audit
+tectonic docs/phase5/paper/wake_en.tex   # compile (likewise wake_ja.tex)
 ```
 
-All three are deterministic; the certification uses interval arithmetic and
-standard library only. Experiment archives are in `data/phase_r/`.
+Upstream inputs (Gaia DR3 fetch, seeded error-MC) regenerate via
+`scripts/fetch_*.py` and `src/wake_p2/run_mc.py`; the clean-environment
+verification record is `docs/phase5/exit-audit-report.md`.
 
-## Repository map
+## Companion mathematics paper
 
-| Path | Role |
-|---|---|
-| `src/wake_r/`, `scripts/`, `docs/phase-r/` | **This paper**: falsification device, certifying verifier, figure/citation scripts, proof records, review ledger, paper sources |
-| `src/wake_engine/`, `src/wake_data/`, `src/wake_epicyclic/`, `src/wake_g3/`, `src/wake_p2/`, `docs/phase0..2/` | Companion work: arrival statistics on the real stellar catalog (**paper in preparation**) |
+The survival/extinction theory imported by the theorem layer is proved in
+*Contact processes on ballistic Poisson particles*
+([DOI 10.5281/zenodo.21955413](https://doi.org/10.5281/zenodo.21955413),
+repository: [wake-ballistic-contact](https://github.com/yukie-lab/wake-ballistic-contact)).
 
 ## License
 
-The Zenodo record (paper + bundled archive) is **CC BY 4.0**; code files in
-this repository are additionally licensed under **MIT** — see [LICENSE](LICENSE).
+- Record (paper, data, figures): **CC BY 4.0**
+- Code (this repository): **MIT** (see `LICENSE`)
 
-Release [`v1.0-zenodo`](https://github.com/yukie-lab/wake-ballistic-contact/releases/tag/v1.0-zenodo)
-corresponds exactly to the Zenodo v1 deposit (identical `wake-repo-v1.tar.gz`,
-sha256 `8c1bfca5114c98a0a751ab695569e9583694833998fde407f73a61307371b8fa`).
+## AI disclosure
+
+All computations and drafts were executed by an AI system (Claude Code,
+model Claude Fable 5) under the direction and arbitration of the human
+author, within a written project constitution; see paper Appendix B. The
+internal verification protocol is not a substitute for human peer review.

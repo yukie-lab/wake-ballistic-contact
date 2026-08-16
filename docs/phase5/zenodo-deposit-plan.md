@@ -1,7 +1,7 @@
 # 本体論文 Zenodo 入稿計画(公開承認後に実施 — 数学論文の手順流用)
 
-> 状態: **公開承認待ち**。本書は承認後の作業仕様の事前固定であり、承認前の
-> アップロードは行わない(憲法第2条5項・従来手順)。
+> 状態: **公開承認済み(裁定#20、監査PASS条件 → 両条件 PASS 済み
+> = docs/phase5/exit-audit-report.md)**。publish はトークン設置後に実施。
 
 ## Creator メタデータ(通読指摘 F5)
 
@@ -30,3 +30,16 @@
    リリースコミット → アーカイブ再生成 → publish → 公開 API で読み戻し検証
 3. GitHub 公開(タグ・Release・README バッジ)→ Zenodo related_identifiers 相互参照
 4. トークン削除・台帳転記
+
+## 確定事項(裁定#20 反映)
+
+- ライセンス: CC BY 4.0(レコード)+ MIT(コード、LICENSE 同梱)
+- シミュレータ公開 URL(確定・付録D 反映済み): https://yukie-lab.github.io/wake-atlas/
+- related_identifiers: 数学論文 DOI 10.5281/zenodo.21955413(isSupplementedBy 系)
+  + GitHub リポジトリ/Release(publish 後にメタデータ編集 API で追加)
+  + Jxiv(掲載確定後に追記)
+- GitHub: yukie-lab/wake-atlas(既存・空)。gh-pages のみ公開済み(手順2)。
+  main push・タグ v1.0-zenodo・Release はリリースコミット後(手順4)。
+  注: タグ名 v1.0-zenodo はローカルでは数学論文リリース(3dc9b58)を指すため、
+  wake-atlas 側タグは `gh release create --target <リリースコミット>` で
+  リモート側にのみ作成する(--tags push 禁止)
