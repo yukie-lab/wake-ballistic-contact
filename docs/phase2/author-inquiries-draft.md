@@ -1,7 +1,7 @@
 # 著者照会 文面ドラフト(裁定ログ#12 次アクション3 — 参謀チャット経由・送付は前田さん最終確認後)
 
 > 表現規律(裁定ログ#11 裁定5): 断定を避け対話の水準で。**反証は論文で、照会は対話で。**
-> 送付タイミング: Phase 2 完了済み → 参謀通読 → 前田さん最終確認後。
+> 送付タイミング(裁定ログ#13 裁定4): **WAKE 本体論文の関連節ドラフト完成時(Phase 5)**、前田さん最終確認後。それまで送付禁止。
 
 ## Draft 1 — To the Gaia DR2 encounters team (BJ+18, arXiv:1805.07581)
 
@@ -24,7 +24,8 @@ the text, and we would be grateful for clarification:
    are they outside its scope?
 4. Were any cuts applied on radial-velocity values or uncertainties?
 5. Could you share the bin widths and the smoothing/fit form used for the
-   completeness map?
+   completeness map? (We found the rate to be sensitive to this choice in our
+   own reconstruction.)
 
 For context: applying your convention (±5 Myr window, 1/C weighting, quadratic
 scaling from 5 pc) to our DR3 sample restricted to G ≤ 12.5 yields
@@ -32,6 +33,10 @@ scaling from 5 pc) to our DR3 sample restricted to G ≤ 12.5 yields
 reconstruction suggests that much of the difference between published rates in
 the literature may trace to accounting and population conventions rather than
 data quality; we would value your view on this reading.
+
+Our study is in preparation; we will gladly share the relevant
+section with you before publication.
+
 
 ## Draft 2 — To the FP26 team (arXiv:2605.16496)
 
@@ -68,6 +73,10 @@ completeness correction targets (full mock population vs. catalogue
 population) rather than by residual spurious parallaxes; we would value your
 view on whether this reading is consistent with your attribution.
 
+Our study is in preparation; we will gladly share the relevant
+section with you before publication.
+
+
 ## Draft 3 — To the author of the DR3 GJ 710 parameters (BB22)
 
 Subject: Possible unit interpretation in the GJ 710 perihelion time
@@ -75,13 +84,17 @@ Subject: Possible unit interpretation in the GJ 710 perihelion time
 Dear colleague,
 
 In comparing published GJ 710 perihelion parameters we noticed that your
-reported t_ph = 1.324 ± 0.026 Myr equals (to 0.1%) our and other groups'
-1.294 Myr when divided by 0.97779 = Myr/(pc·(km/s)⁻¹), i.e., it matches a
-perihelion time expressed in pc/(km/s) units. Could this be a unit conversion
+reported t_ph = 1.324 ± 0.026 Myr coincides (to 0.1%) with our value of
+1.294 Myr expressed in units of pc/(km/s):
+1.294 Myr / (0.97779 Myr per pc km⁻¹ s) = 1.3234. Could a unit conversion be
 at play? We ask because our DR3 reproduction (numerical orbit integration and
 LMA) yields 1.294 Myr, 0.0503 pc, in agreement with de la Fuente Marcos &
 de la Fuente Marcos (2022) and your distance value. We would welcome your
 view before we discuss the comparison in print.
+
+Our study is in preparation; we will gladly share the relevant
+section with you before publication.
+
 
 ---
 
