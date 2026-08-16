@@ -2,10 +2,14 @@
 WAKE.map = (() => {
   const cv = document.getElementById("mapCanvas");
   const ctx = cv.getContext("2d");
-  let W, H, lastKey = "";
-  // 下端は条件文バー(複数行)の上に出す
+  let W, H, PB, lastKey = "";
+  // 下端は条件文バーの実測高さの上に出す(言語・折返し行数に追従 — 美学レビュー)
   const RX = R => 70 + (Math.log10(R) + 1) / 2 * (W - 120);
-  const FY = f => H - 240 - (Math.log10(f) + 4) / 4 * (H - 290);
+  const FY = f => PB - (Math.log10(f) + 4) / 4 * (PB - 50);
+  function sentenceH() {
+    const el = document.getElementById("sentence");
+    return (el && el.offsetHeight) ? el.offsetHeight : 70;
+  }
   // ヒートはオフスクリーン ImageData(セル毎 fillRect は 1fps 級に落ちる)
   const CW = 240, CH = 160;
   const off = document.createElement("canvas");
@@ -44,11 +48,13 @@ WAKE.map = (() => {
   function draw(force) {
     const w = cv.clientWidth * devicePixelRatio, h = cv.clientHeight * devicePixelRatio;
     const s = WAKE.state;
-    const key = [w, h, s.v_kms, s.L_myr, s.layer, s.lang].join("|");
+    const sh = sentenceH();
+    const key = [w, h, sh, s.v_kms, s.L_myr, s.layer, s.lang].join("|");
     if (!force && key === lastKey) return;   // 入力が変わった時だけ再描画
     lastKey = key;
     if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
     W = w; H = h;
+    PB = H - (sh + 32) * devicePixelRatio;   // プロット下端 = バー上端+ラベル行ぶん上
     ctx.clearRect(0, 0, W, H);
     ctx.font = `${11 * devicePixelRatio}px sans-serif`;
     const v = s.v_kms;
@@ -75,10 +81,10 @@ WAKE.map = (() => {
     }
     octx.putImageData(img, 0, 0);
     ctx.imageSmoothingEnabled = true;
-    ctx.drawImage(off, 70, 50, W - 120, H - 290);
+    ctx.drawImage(off, 70, 50, W - 120, PB - 50);
     // d² 外挿域(flag=1 ⇔ R<1)の帯
     ctx.fillStyle = "rgba(241,196,64,0.10)";
-    ctx.fillRect(RX(0.1), 50, RX(1.0) - RX(0.1), H - 290);
+    ctx.fillRect(RX(0.1), 50, RX(1.0) - RX(0.1), PB - 50);
     // f* 線
     ctx.strokeStyle = "#ff8c66"; ctx.lineWidth = 2 * devicePixelRatio; ctx.beginPath();
     let started = false;
@@ -99,7 +105,7 @@ WAKE.map = (() => {
       const lbl = R + " pc";
       // 右端ラベルの見切れ防止(美学レビュー指摘)
       const lx = Math.min(RX(R) - 10, W - ctx.measureText(lbl).width - 4 * devicePixelRatio);
-      ctx.fillText(lbl, lx, H - 220);
+      ctx.fillText(lbl, lx, PB + 14 * devicePixelRatio);
     });
     [1e-4, 1e-3, 1e-2, 1e-1, 1].forEach(f => ctx.fillText(f.toExponential(0), 12, FY(f) + 4));
     // 凡例は f* ミニ表示・判定不能パネル(DOM, css 高 ~225px)の下に出す
@@ -112,7 +118,7 @@ WAKE.map = (() => {
     ctx.fillStyle = "#7f8ea3"; ctx.fillText(WAKE.t("mapUndec"), lx, ly + 3 * lh + 3);
     const dash = RX(3.07);
     ctx.strokeStyle = "#d8dee9"; ctx.setLineDash([4, 4]); ctx.beginPath();
-    ctx.moveTo(dash, 50); ctx.lineTo(dash, H - 240); ctx.stroke(); ctx.setLineDash([]);
+    ctx.moveTo(dash, 50); ctx.lineTo(dash, PB); ctx.stroke(); ctx.setLineDash([]);
     ctx.fillStyle = "#d8dee9"; ctx.fillText(WAKE.t("mapCN19"), dash + 4, 62);
   }
 
