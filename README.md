@@ -4,7 +4,7 @@
 
 Yukie Maeda ([ORCID 0009-0005-3401-9230](https://orcid.org/0009-0005-3401-9230)) — Independent Researcher, Tokyo
 
-<!-- DOI badge inserted at the Zenodo release commit -->
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21966305.svg)](https://doi.org/10.5281/zenodo.21966305)
 
 Should we have been visited? This repository carries the full WAKE atlas:
 the bilingual paper (English authoritative, Japanese translation), the
