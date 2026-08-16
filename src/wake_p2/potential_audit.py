@@ -26,13 +26,17 @@ DT = 0.005
 N_SURR = 2000
 
 
+import os
+MC_DIR = os.environ.get("WAKE_MC_DIR", str(P2 / "mc"))
+
+
 def mc_halfwidths(n_cat):
-    """誤差 MC の CI90 半幅(星ごと)— 監査時点の chunk 群から"""
+    """誤差 MC の CI90 半幅(星ごと)— WAKE_MC_DIR の chunk 群から"""
     t_lo = np.full(n_cat, np.nan)
     t_hi = np.full(n_cat, np.nan)
     d_lo = np.full(n_cat, np.nan)
     d_hi = np.full(n_cat, np.nan)
-    for f in sorted(glob.glob(str(P2 / "mc" / "chunk_*.npz"))):
+    for f in sorted(glob.glob(str(pathlib.Path(MC_DIR) / "chunk_*.npz"))):
         z = np.load(f)
         idx = z["star_idx"]
         t_ph, d_ph = z["t_ph"], z["d_ph"]
@@ -67,7 +71,7 @@ def main():
                                err_d_halfwidth=np.where(np.isfinite(dh), dh, np.inf))
     md = rep.to_markdown()
     lines = ["# ポテンシャル2種監査 本適用(Phase 2 出口条件)", "",
-             f"> 実行: 2026-08-16 / "
+             f"> 実行: 2026-08-17 / CI半幅ソース: {pathlib.Path(MC_DIR).name} / "
              f"`~/miniforge3/envs/wake/bin/python src/wake_p2/potential_audit.py`",
              "",
              "## 表引き化の補間誤差監査(potentials.py の添付条件)", "",
