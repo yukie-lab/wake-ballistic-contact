@@ -98,13 +98,17 @@ class EpicyclicFrame:
         i = np.argmin(d, axis=0)
         i = np.clip(i, 1, n_samples - 2)
         cols = np.arange(d.shape[1])
-        y0, y1, y2 = d[i - 1, cols], d[i, cols], d[i + 1, cols]
-        denom = y0 - 2 * y1 + y2
-        delta = np.where(np.abs(denom) > 1e-30, 0.5 * (y0 - y2) / denom, 0.0)
+        # 放物線精密化は d²(線形相対運動で厳密に2次。d への当てはめは
+        # 高速星の尖った極小で破綻 — 2026-08-16 G2 本試験で検出・修正)
+        q0 = d[i - 1, cols] ** 2
+        q1 = d[i, cols] ** 2
+        q2 = d[i + 1, cols] ** 2
+        denom = q0 - 2 * q1 + q2
+        delta = np.where(np.abs(denom) > 1e-30, 0.5 * (q0 - q2) / denom, 0.0)
         delta = np.clip(delta, -1.0, 1.0)
         h = ts[1] - ts[0]
         t_min = ts[i] + delta * h
-        d_min = y1 - 0.25 * (y0 - y2) * delta
+        d_min = np.sqrt(np.maximum(q1 - 0.25 * (q0 - q2) * delta, 0.0))
         at_edge = (i <= 1) | (i >= n_samples - 2)
         return t_min, d_min, at_edge
 

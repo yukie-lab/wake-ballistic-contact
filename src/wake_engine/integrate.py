@@ -67,16 +67,23 @@ def propagate(potential: Potential, pos, vel, t_end: float, dt: float,
         t += h
         d = dist()
         if d_p is not None:
-            # d_{k-1} が局所極小なら3点放物線で精密化
+            # d_{k-1} が局所極小なら3点放物線で精密化。
+            # 放物線は d ではなく **d²** に当てる(線形相対運動で d²(t) は厳密に
+            # 2次 — d への当てはめは v·h ≫ d の尖った極小で破綻し、旧実装は
+            # さらに頂点係数が 1/2 だった。2026-08-16 G2 本試験で検出・修正。
+            # G3 アンカー回帰で再検証済み)
             local_min = (d_p <= d_pp) & (d_p <= d)
             if np.any(local_min):
-                y0, y1, y2 = d_pp[local_min], d_p[local_min], d[local_min]
-                denom = y0 - 2 * y1 + y2
+                q0 = d_pp[local_min] ** 2
+                q1 = d_p[local_min] ** 2
+                q2 = d[local_min] ** 2
+                denom = q0 - 2 * q1 + q2
                 delta = np.where(np.abs(denom) > 1e-30,
-                                 0.5 * (y0 - y2) / np.maximum(np.abs(denom), 1e-30)
+                                 0.5 * (q0 - q2) / np.maximum(np.abs(denom), 1e-30)
                                  * np.sign(denom), 0.0)
                 delta = np.clip(delta, -1.0, 1.0)
-                d_star = y1 - 0.125 * (y0 - y2) * delta
+                q_star = np.maximum(q1 - 0.25 * (q0 - q2) * delta, 0.0)
+                d_star = np.sqrt(q_star)
                 t_star = (t - h) + delta * h
                 better = d_star < d_min[local_min]
                 idx = np.flatnonzero(local_min)[better]
