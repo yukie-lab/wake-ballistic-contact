@@ -53,3 +53,63 @@
   判定: 差分要確認
 
 ## ゲート7 最終判定: PASS(完全一致)
+
+# ===== 通読指摘 F1–F5 反映後の再走(2026-08-16)=====
+# 反映: F1 付録A/D実文章化(B/C=アーカイブ同梱+参照方式)/ F2 §4 matching→consistent with
+# / F3 本追記 / F4 em-dash削減(EN≤1/段落・JA全廃、ゲート1に計数検査追加)
+# / F5 著者ブロック(Independent Researcher, Tokyo / ORCID 0009-0005-3401-9230)
+# 参照追加: bb22(Bobylev & Bajkova 2022, Astron. Lett. 48, 542 — Crossref 機械検証済み、計18件)
+# 検査器: scripts/gate_check_paper.py(恒久化 — 本走はこの版が正)
+
+## ゲート7 '3.0' の解消経緯(F3)
+# 初走(2026-08-16 18:39)のゲート7で EN のみ集合に ['3.0'] が残った。
+# 出所は付録C のビン幅走査範囲「Δt = 0.5→3.0 Myr」で、当時の和文付録C
+# (ブラケット要約)に走査範囲の上端 3.0 が未記載だったため。和文付録Cに
+# 走査範囲を追記して解消し、初走ログ末尾の「ゲート7 最終判定: PASS(完全一致)」
+# はその修正後の判定である。今回 F1 で両版の付録Cを本文化した際も
+# 0.5→3.0 の範囲を両版に保持し、下記のとおり完全一致を維持した。
+
+## ゲート1: 文言統一+em-dash 削減(F4)
+  [PASS] 禁止語 'truly differ' = 0 — 0 件
+  [PASS] 禁止語 '真に異なる' = 0 — 0 件
+  [PASS] 禁止語 '証明した' = 0 — 0 件
+  [PASS] 禁止語 'proves that visitation' = 0 — 0 件
+  [PASS] 禁止語 '照会予定' = 0 — 0 件
+  [PASS] 禁止語 'we will inquire' = 0 — 0 件
+  [PASS] 禁止語 '確実に' = 0 — 0 件
+  [PASS] 禁止語 'certainly' = 0 — 0 件
+  [PASS] 禁止語 ', matching' = 0 — 0 件
+  [PASS] EN em-dash ≤1/段落 — 超過段落 []
+  [PASS] JA em-dash 全廃 — 0 件
+## ゲート2: 引用機械検証
+  [PASS] verify_refs ALL RESOLVED — ALL RESOLVED
+## ゲート3: 数値一貫性(本文 vs JSON)
+  [PASS] カタログ clean IPW 1pc = 4.485(本文 4.49/4.5)
+  [PASS] 網 Δv(0.1pc) = 5.93
+  [PASS] f*(3.07,10) ≈ 5.0e-3(JSON 再計算) — 5.030e-03
+  [PASS] '4.49' EN=1 JA=1
+  [PASS] '137.3' EN=1 JA=1
+  [PASS] '5.0\times10^{-3}' EN=3 JA=3
+  [PASS] '23.7' EN=2 JA=2
+  [PASS] '21.3' EN=1 JA=1
+  [PASS] '1{,}323' EN=1 JA=1
+  [PASS] '646' EN=2 JA=2
+  [PASS] '2{,}197' EN=2 JA=2
+  [PASS] '56{,}286' EN=2 JA=2
+  [PASS] '697' EN=1 JA=1
+  [PASS] '5.8' EN=4 JA=4
+  [PASS] '0.19' EN=1 JA=1
+## ゲート4: f* 定義規約の両所在(補強3)
+  [PASS] f* 規約 本文(EN/JA)+JSON — EN=1 JA=1 JSON=True
+## ゲート5: 解釈規律
+  [PASS] 'FGK' EN=6 JA=6(>0)
+  [PASS] 'undecidable|判定不能' EN=13 JA=15(>0)
+  [PASS] 'surveying, not proof|測量であって証明ではない' EN=3 JA=3(>0)
+  [PASS] 'conditional probability|条件付き確率文' EN=1 JA=1(>0)
+## ゲート6: コンパイル
+  [PASS] tectonic wake_en.tex — 218843B
+  [PASS] tectonic wake_ja.tex — 504574B
+## ゲート7: 日英数値集合の完全一致(小数抽出)
+  [PASS] 数値集合 EN 98 / JA 98 — ENのみ [] / JAのみ []
+
+結果: 全ゲート PASS

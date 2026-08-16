@@ -1,5 +1,5 @@
-# 引用機械検証ログ(2026-08-16 18:38 JST)
-# 対象: wake_refs.bib / 全 17 件 / 未解決 0 件
+# 引用機械検証ログ(2026-08-16 21:29 JST)
+# 対象: /Users/yukie/Desktop/test/wake/docs/phase5/paper/wake_refs.bib / 全 18 件 / 未解決 0 件
 [RESOLVED] wakemath: doi:10.5281/zenodo.21955413 -> OK (HTTP 200)
 [RESOLVED] bj18: doi:10.1051/0004-6361/201833456 -> OK (doi.org HTTP 403; Crossref OK: New stellar encounters discovered in the second <i>Gaia</i> ) | arXiv:1805.07581 -> OK (New stellar encounters discovered in the second Gaia data release)
 [RESOLVED] fp26: doi:10.1051/0004-6361/202659497 -> OK (doi.org HTTP 403; Crossref OK: Stellar encounters in the solar neighbourhood and the specia) | arXiv:2605.16496 -> OK (Stellar encounters in the solar neighbourhood and the special case of GJ~710)
@@ -17,3 +17,4 @@
 [RESOLVED] gaiadr3: doi:10.1051/0004-6361/202243940 -> OK (doi.org HTTP 403; Crossref OK: <i>Gaia</i> Data Release 3) | arXiv:2208.00211 -> OK (Gaia Data Release 3: Summary of the content and survey properties)
 [RESOLVED] cn19: doi:10.3847/1538-3881/ab31a3 -> OK (HTTP 200) | arXiv:1902.04450 -> OK (The Fermi Paradox and the Aurora Effect: Exo-civilization Settlement, Expansion )
 [RESOLVED] mcmillan17: doi:10.1093/mnras/stw3325 -> OK (doi.org HTTP 403; Crossref OK: Spatial and kinematic segregation in star-cluster merger rem) | arXiv:1608.00971 -> OK (The mass distribution and gravitational potential of the Milky Way)
+[RESOLVED] bb22: doi:10.1134/S1063773722080011 -> OK (HTTP 200)

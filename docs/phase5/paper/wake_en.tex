@@ -13,8 +13,10 @@
 \title{WAKE: a visitation-statistics atlas of the solar neighbourhood ---\\
 arrival statistics, an exclusion map, and a flyby network\\
 on Gaia DR3 kinematics\\[1ex]
-\large (Preprint --- English version; a Japanese version accompanies this record)}
-\author{Yukie Maeda\thanks{Independent researcher. The roles of AI systems and
+\large (Preprint, English version; a Japanese version accompanies this record)}
+\author{Yukie Maeda\\
+\normalsize Independent Researcher, Tokyo\\
+\normalsize ORCID: 0009-0005-3401-9230\thanks{The roles of AI systems and
 the complete verification protocol are disclosed in Appendix~B; this internal
 verification is not a substitute for human peer review.}}
 \date{August 2026}
@@ -31,7 +33,7 @@ combined with settlement dynamics in the probe-based, entry-driven convention
 of Carroll-Nellenback et al. Our contributions are three layers on one
 catalogue. (1) \emph{Arrival statistics}: a completeness-corrected,
 exposure-normalized encounter rate with explicitly declared accounting
-conventions --- reconstructing the accounting of the two published rate camps
+conventions. Reconstructing the accounting of the two published rate camps
 on our own data, we find their factor-of-two split is dominated by the
 population that the completeness correction targets, not by data quality; we
 also identify a third systematic mode (faint-end Gaia RVS radial-velocity
@@ -61,8 +63,8 @@ reported as undecidable. This is surveying, not proof.
 \section{Introduction}\label{sec:intro}
 
 Should we have been visited? If settled systems exist in the Galaxy and
-expand in the cheapest available channel --- slow, small, and old probes
-launched at close stellar passages --- then the question of whether the solar
+expand in the cheapest available channel (slow, small, and old probes
+launched at close stellar passages), then the question of whether the solar
 system has been reached is not a matter of speculation but of
 \emph{measured kinematics}: which stars have passed within probe range, when,
 and at what rate, given the selection function of the survey that observed
@@ -74,8 +76,8 @@ This is the third branch of a visitation-hypothesis research programme
 channels in TESSERA); the present branch is the sub-light channel, for which
 the solar neighbourhood's real kinematics are the decisive input. Our claim
 to novelty is deliberately narrow: \emph{the overlay of settlement dynamics
-on real-catalogue encounter statistics}. The first layer alone --- encounter
-statistics --- is a well-developed field \cite{bj18,bj22,gs01,fp26}; we treat
+on real-catalogue encounter statistics}. The first layer alone, encounter
+statistics, is a well-developed field \cite{bj18,bj22,gs01,fp26}; we treat
 it as our verification bench, reproducing published anchors before adding
 anything (Section~\ref{sec:prop}). The mathematical foundations of the
 settlement-dynamics layer (survival and extinction theorems for contact
@@ -196,13 +198,13 @@ weights; the $d^2$-law tests of Section~\ref{sec:prop} live in the
 BJ-convention reconstruction, a different accounting.
 
 \subsection{Three conventions on one data set}
-The two published 1-pc rate camps --- $19.7\pm2.2\Myr^{-1}$ \cite{bj18} and
-$10.6\pm4.5\Myr^{-1}$ \cite{fp26} --- use different accounting conventions
+The two published 1-pc rate camps ($19.7\pm2.2\Myr^{-1}$ \cite{bj18} and
+$10.6\pm4.5\Myr^{-1}$ \cite{fp26}) use different accounting conventions
 (window, exposure, completeness target, and population). We reconstructed
-both conventions from the published texts (the reconstruction limits ---
-five points for \cite{bj18}, seven for \cite{fp26} that could not be
-determined from the texts --- are listed neutrally in Appendix~A) and
-applied all three to our single data set:
+both conventions from the published texts (the five points for \cite{bj18}
+and seven for \cite{fp26} that could not be determined from the texts are
+listed neutrally in Appendix~A) and applied all three to our single data
+set:
 
 \begin{center}
 \begin{tabular}{lll}
@@ -220,13 +222,13 @@ The BJ-convention value is reproduced on clean DR3 data --- so residual
 spurious astrometry is unlikely to be the main driver of the published
 split. The remaining FP26 gap closes when the faint-end RV artifacts of
 Section~\ref{sec:bit5} are excluded (bright-only discrete counting gives
-$\simeq7.6$, matching their solar value of $9.1$). Based on this
+$\simeq7.6$, consistent with their solar value of $9.1$). Based on this
 reconstruction, the split is dominated by the \emph{population that the
 completeness correction targets}: \cite{bj18} corrects to the full mock
 stellar population, \cite{fp26} does not correct beyond a window factor.
-Consistently, a two-ledger check on our own data --- correcting by
+Consistently, a two-ledger check on our own data, correcting by
 per-star exposure and IPW (denominator ledger) versus by a mock-based
-$C(t,d)$ completeness map (numerator ledger, Appendix~C) --- yields a
+$C(t,d)$ completeness map (numerator ledger, Appendix~C), yields a
 measured \emph{population bridge} of $5.3\times$ between the FGK+early-M
 and full-population rates, compared with the $\sim9\times$ implied by the
 mock extrapolation of \cite{bj18}; the difference is a quantitative basis
@@ -234,8 +236,8 @@ for critiquing mock-based completeness corrections.
 
 \subsection{Arrival catalogue and structure}
 The arrival-event catalogue (2{,}197 stars with median perihelion within
-5\;pc inside $|t|\le13\Myr$) reproduces the well-known close passages ---
-HD~7977 ($0.037\pc$, $-2.76\Myr$), GJ~710 ($0.052\pc$, $+1.29\Myr$) --- and
+5\;pc inside $|t|\le13\Myr$) reproduces the well-known close passages
+HD~7977 ($0.037\pc$, $-2.76\Myr$) and GJ~710 ($0.052\pc$, $+1.29\Myr$), and
 carries all quarantine, horizon, and both-ways rate metadata. The
 time-resolved rate $\lam(t)$ shows no kinematically coherent clumps (all
 apparent clumps are single-star dominated; pairwise $\Delta UVW\ge45\kms$),
@@ -296,8 +298,8 @@ $\bar\Lambda\le4$ on a speed shell, which the isotropized DR3 distribution
 satisfies non-trivially at $\bar\Lambda=3.3$--$3.6$) yields a
 \textbf{three-valued legend}: (i) \emph{C2-guaranteed} (assumptions hold and
 the numerical threshold is exceeded), (ii) \emph{theorem-silent}
-(assumptions fail --- notably the \emph{entire} standard scan domain of
-\cite{cn19}, $R=3.07\pc$ with $T_s=0.1$--$1\Myr$, is theorem-silent;
+(assumptions fail; notably the \emph{entire} standard scan domain of
+\cite{cn19}, $R=3.07\pc$ with $T_s=0.1$--$1\Myr$, is theorem-silent, and
 guarantees open only at $T_s\gtrsim3\Myr$), and (iii) the reminder that
 \emph{no extinction theorem exists for the full model anywhere} (the
 companion paper proves the SIR-type bound does not extend), so
@@ -323,8 +325,8 @@ edge ($m>2.0$).}
 
 \subsection{Front-direction sensitivity}
 For the front-family mark field, the direction average over two priors
-(uniform sphere vs.\ galactocentric bias) shifts the map by only $2.5\%$
---- prior-robust. The \emph{per-direction} spread is large ($52\%$):
+(uniform sphere vs.\ galactocentric bias) shifts the map by only $2.5\%$;
+the map is prior-robust. The \emph{per-direction} spread is large ($52\%$):
 arrivals are apex-concentrated, so a settlement front's effectiveness
 depends on its direction relative to the solar apex --- a direction
 dependence we report as a finding connecting to the settlement-direction
@@ -347,9 +349,9 @@ $d\le1\pc$)
 --- and this is a \emph{statistical property of the network}, not of a
 particular star: over the error-MC ensemble the route exists in 100\% of
 draws with median $5.7$--$5.9\kms$ (departure charged entirely to
-propellant --- co-moving riders cannot use flybys to accelerate --- so the
+propellant, since co-moving riders cannot use flybys to accelerate, so the
 budget is an upper bound). Direct passages within $0.1\pc$ in the window
-are HD~7977 and GJ~710, matching the known record. The graph estimate is
+are HD~7977 and GJ~710, as in the published record. The graph estimate is
 validated by a formulation-independent counter-path: Jacobian shooting in
 the full potential converges to sub-0.1-mpc misses and shifts the transfer
 budget by at most $0.19\kms$ (tidal terms are subdominant).
@@ -367,7 +369,7 @@ vs.\ time) and the minimal single-transfer route into $d\le0.1\pc$.}
 \section{Discussion}\label{sec:disc}
 
 \textbf{The philosophy of undecidability.} The atlas's reliability rests on
-an asymmetry principle --- prefer undecidable over falsely decidable ---
+an asymmetry principle (prefer undecidable over falsely decidable),
 implemented in three mechanisms: individual horizons with three components
 (measurement growth, potential-model divergence, budget-type truncation),
 five quarantine systems with both-ways reporting, and the three-valued
@@ -402,7 +404,7 @@ propellant-minimal visiting route through the real stellar traffic exists
 at $\Delta v\simeq5.8\kms$ at all times. Methodologically we contribute the
 exposure-accounting analysis, the faint-end RV artifact quarantine with its
 tangential-velocity test, and the two-ledger completeness check with its
-measured population bridge. The atlas is surveying, not proof --- but it
+measured population bridge. The atlas is surveying, not proof; but it
 turns the visitation question into numbers that Gaia DR4 can sharpen.
 
 %======================================================================
@@ -410,37 +412,159 @@ turns the visitation question into numbers that Gaia DR4 can sharpen.
 
 \section{GJ 710, published-value splits, and reconstruction limits}
 \label{app:gj710}
-[GJ~710 perihelion values across DR2/DR3 analyses; our reproduction
-($1.294\Myr$, $0.0503\pc$) agrees with \cite{dlfm22}; a unit-conversion
-hypothesis for one published time value is stated neutrally
-(our $1.294\Myr$ expressed in pc/(km/s) units equals $1.3234$, coinciding
-with the published $1.324\pm0.026$ to 0.1\%). The full accounting
-comparison table for \cite{bj18} and \cite{fp26}, with the twelve points
-that could not be determined from the published texts, is reproduced here
-from the repository records; these lists disclose the limits of our
-reconstruction.]
+
+\subsection{GJ 710 across DR3-era analyses}\label{app:gj710tab}
+Table~\ref{tab:gj710} collects published DR3-era perihelion parameters for
+GJ~710 alongside our reproduction. Our numerical integration in the
+DC95-class potential gives $1.294\Myr$ and $0.0503\pc$; the
+MWPotential2014-class main path gives $0.0519\pc$; and the closed-form
+linear-motion approximation on the same DR3 inputs gives $1.294\Myr$ and
+$0.0513\pc$, so the orbit-curvature contribution is at most $0.002\pc$ in
+this window.
+
+\begin{table}[h]\centering
+\begin{tabular}{lll}
+\toprule
+Analysis & $t_{\rm ph}$ [Myr] & $d_{\rm ph}$ [pc] \\
+\midrule
+This work (DR3 inputs) & $1.294$ & $0.0503$--$0.0519$ \\
+\cite{dlfm22} ($N$-body) & $1.29$ ($1.26$--$1.33$) & $0.052$ ($0.048$--$0.056$) \\
+\cite{bb22} (orbit integration) & $1.324\pm0.026$ & $0.052\pm0.002$ \\
+\cite{bj22} & $1.292$ ($1.257$--$1.334$) & $0.0636$ ($0.0595$--$0.0678$) \\
+\cite{fp26} & $1.3446\pm0.0022$ & $0.0621\pm0.0023$ \\
+\bottomrule
+\end{tabular}
+\caption{Published GJ 710 perihelion parameters (DR3 era) and our
+reproduction. Intervals in parentheses are the published 90\% ranges.}
+\label{tab:gj710}
+\end{table}
+
+The perihelion distances fall into two camps: $0.051$--$0.052\pc$
+(\cite{dlfm22}, \cite{bb22}, this work) and $0.062$--$0.068\pc$
+(\cite{bj22}, \cite{fp26}). The split is not a data-release effect:
+rerunning our pipeline on DR2 inputs gives $0.0525\pc$ where \cite{bj18}
+published $0.0676\pc$, so the same two camps existed in the DR2 generation.
+The adopted radial velocities differ only in the second decimal
+($-14.4$ vs.\ $-14.42\kms$), which cannot produce the gap; based on our
+reconstruction the split is pipeline-specific, and we document it neutrally
+here rather than adjudicate it.
+
+For the one published perihelion time that stands apart
+($1.324\pm0.026\Myr$ in \cite{bb22}, against $1.29$--$1.295\Myr$ in the
+other analyses and this work, including the distance-consistent linear-method
+row of the same paper), we record a neutral unit-conversion hypothesis: our
+$1.294\Myr$ expressed in units of pc/(km\,s$^{-1}$) equals
+$1.294/0.97779=1.3234$, coinciding with the published value to $0.1\%$. We
+state this as an observation about a numerical coincidence, not as an
+attribution.
+
+\subsection{The reconstructed accounting conventions}\label{app:acctab}
+Table~\ref{tab:conventions} is our reconstruction, from the published
+texts, of the accounting conventions of \cite{bj18} and \cite{fp26}, next
+to ours. It is the basis of the three-convention cross-check of
+Section~\ref{sec:arrival}; every cell is our reading of the texts, and the
+points we could not determine are listed in
+Appendix~\ref{app:limits}.
+
+\begin{table}[h]\centering\small
+\begin{tabular}{p{2.1cm}p{3.6cm}p{3.9cm}p{3.9cm}}
+\toprule
+ & \cite{bj18} & \cite{fp26} & This work \\
+\midrule
+Target & the Sun & per-star average over 3{,}765 systems within 25\;pc (the
+Sun is one sample at the mode of the distribution) & the Sun \\[2pt]
+Exposure & uniform $\pm5\Myr$; measured at 5\;pc, scaled to 1\;pc by
+$(d/5)^2$ & uniform $\pm0.47\Myr$, derived from the 90th-percentile speed
+and the 25-pc boundary; direct at $d<1\pc$ & per-star $2\min(T,t_h)$ with
+individual horizons; direct at $d<1\pc$ \\[2pt]
+Time truncation & fractional surrogate counting inside the window; no
+per-star truncation & uniform $\div0.70$ window-end correction; no per-star
+truncation & numerator restricted to the control region $|t|\le t_h$;
+denominator restricted by the same $t_h$ \\[2pt]
+Undecidable-type events & spurious solutions filtered; residual bogus
+encounters retained (acknowledged as an upward effect) & ``unreliable''
+events ($1\sigma$ exceeding 50\% of the nominal distance) excluded; bound
+systems merged; catalogue spatial completeness (91\% at 50\;pc) not applied
+to the rate & $S<s_{\rm floor}$, out-of-horizon, and window-edge events
+separated as undecidable \\[2pt]
+Completeness & two-dimensional $C(t_{\rm ph},d_{\rm ph})$ from a Galaxia
+mock against a simulated RV selection ($\langle C\rangle\approx0.14$ at
+$\pm5\Myr$); $1/C$ applied to the numerator & uniform $0.70$ (window-end
+only) & IPW $1/S$ over the DR3 RVS selection function with
+$s_{\rm floor}=0.05$ \\[2pt]
+Corrected population & the full stellar population represented by the mock
+& the RV-bearing catalogue population & the RVS-selectable population
+(FGK+early-M); the remainder reported undecidable \\
+\bottomrule
+\end{tabular}
+\caption{Reconstructed accounting conventions behind the three-convention
+cross-check.}
+\label{tab:conventions}
+\end{table}
+
+\subsection{Points not determinable from the published texts}
+\label{app:limits}
+Our reconstruction could not determine the following twelve points; they
+bound the strength of every comparison made in this paper. For \cite{bj18}:
+(1) the specific rationale for the $\pm5\Myr$ rate window; (2) whether the
+Galaxia-based mock includes white dwarfs, brown dwarfs, and unresolved
+binaries in the completeness normalization; (3) whether losses induced by
+the astrometric quality filters are intended to be absorbed by
+$C(t_{\rm ph},d_{\rm ph})$; (4) whether any cuts were applied on
+radial-velocity values or uncertainties; (5) the bin widths and smoothing
+form of the completeness map (our reconstruction is sensitive to this
+choice; Appendix~\ref{app:binwidth}). For \cite{fp26}: (1) whether each
+encounter is attributed to both members of a pair in ``per Myr and star'';
+(2) the denominator of the GJ~710-class rate $0.0210$ (our arithmetic gives
+$0.0236$); (3) whether the acceptance and reliability rules apply to the
+full star--star statistics or only to the solar-encounter analysis; (4) the
+precise meaning of the $\pm4.5$ uncertainty; (5) the rationale for not
+applying the catalogue spatial completeness to the rate; (6) the relation
+between the $122\kms$ completeness limit and the 90th-percentile speed used
+for the window; (7) the reading of the \cite{bj18} window as ``within
+15\;Myr'' in their text, against the $\pm5\Myr$ of the original.
 
 \section{Method record and AI disclosure}\label{app:method}
-[Complete verification protocol: claim-driven falsification against an
-independent simulation device; machine certification of geometric
-constants; error ledger including the two propagation-refinement defects
-found by gate G2 and the ``agreeing numbers are the ones to distrust''
-episode (two mutually confirming rate values, $11.7$ and $20.3$, were both
-wrong for different reasons and were caught by convention identification
-and engine re-verification). Roles of AI systems (Claude Code, model Claude
-Fable 5) as executor under human arbitration; steering-intervention log
-empty; this internal verification is not a substitute for human peer
-review.]
+The complete method record is bundled with this record as a repository
+archive (verification code under \texttt{src/}, phase documents and ruling
+records under \texttt{docs/}); this appendix summarizes it and fixes its
+location.
+
+\emph{Verification protocol.} Every quantitative claim passed three gates:
+convergence (G1), formulation independence against an independent analytic
+counter-path (G2), and invariant anchors that reproduce published
+encounters before any new statistics are claimed (G3), with a standing rule
+that anchor failure halts the pipeline. The error ledger is public in the
+archive. Its two entries most relevant to this paper are: (i) the two
+propagation-refinement defects found by gate G2 (a vertex coefficient in
+the parabolic refinement and a sharp-minimum breakdown of the $d$-parabola,
+both repaired by exact $d^2$-interpolation, after which all G3 anchors
+re-passed and the full error MC was re-run); and (ii) an episode we record
+as ``agreeing numbers are the ones to distrust'': two mutually confirming
+rate values ($11.7$ and $20.3\Myr^{-1}$) were both wrong for different
+reasons (a horizon-ignored exposure convention and the propagation defect
+above), and the agreement dissolved only under convention identification
+and engine re-verification.
+
+\emph{AI disclosure.} The executor of all computations and drafts was an AI
+system (Claude Code, model Claude Fable 5) operating under the direction
+and arbitration of the human author, within a written project constitution;
+the ruling records of every phase gate are in the archive, and the
+steering-intervention log is empty. This internal verification is not a
+substitute for human peer review.
 
 \section{Completeness-map bin width as a hidden regularizer}
 \label{app:binwidth}
-[The mock-based $C(t,d)$ completeness map \cite{rybizki18,sharma11}: its bin width acts as a hidden
-regularization parameter: the reconstructed BJ-convention rate scans
-non-monotonically ($46.5\to23.7\to20.4\to27.1\to20.7\Myr^{-1}$ for
-$\Delta t=0.5\to3.0\Myr$; Figure~\ref{fig:binwidth}) --- fine bins diverge
-through empty-cell $1/C$ weights, coarse bins alias. We adopt
+The mock-based $C(t,d)$ completeness map used in our BJ-convention
+reconstruction \cite{rybizki18,sharma11} carries a hidden regularization
+parameter: its bin width. The reconstructed rate scans non-monotonically,
+$46.5\to23.7\to20.4\to27.1\to20.7\Myr^{-1}$ for
+$\Delta t=0.5\to3.0\Myr$ (Figure~\ref{fig:binwidth}): fine bins diverge
+through empty-cell $1/C$ weights, and coarse bins alias. We adopt
 $(\Delta t,\Delta d)=(1.5\Myr,0.75\pc)$ with a $\pm15\%$ grid-systematic
-band, and co-report the canonical $(1.0,0.5)$ value.]
+band, and co-report the canonical $(1.0,0.5)$ value. The full scan record
+is in the bundled archive
+(\texttt{docs/phase2/06-ctd-reference.md}).
 
 \begin{figure}[t]\centering
 \includegraphics[width=.5\textwidth]{figs/fig4_binwidth.pdf}
@@ -450,13 +574,40 @@ hidden regularization parameter, disclosed.}
 \end{figure}
 
 \section{Reproducibility and data release}\label{app:release}
-[The public data set: \texttt{arrival\_catalog\_v1.json},
-\texttt{exclusion\_map\_v1.json} (v1.0.1),
-\texttt{flyby\_network\_v1.json}, with a SHA-256 manifest; regeneration
-commands for every figure and table; the browser simulator reads exactly
-these files (additive-compatibility schema principle). This appendix is the
-paper-side anchor of the three-artifact consistency audit (paper,
-data/maps, simulator).]
+This appendix is the paper-side anchor of the three-artifact consistency
+audit among the paper, the released data, and the browser simulator.
+
+\emph{Released data.} Three JSON files constitute the public data set.
+\texttt{arrival\_catalog\_v1.json} (schema v1.1) carries the 2{,}197
+arrival events with quarantine, horizon, and both-ways rate metadata, plus
+per-event astrometry and a 32-surrogate display bundle drawn from the real
+covariances. \texttt{exclusion\_map\_v1.json} (map version 1.0.1) carries
+the rate layers, the conditional-statement template in both languages, and
+the three-valued theorem layer with its numerical-threshold notes.
+\texttt{flyby\_network\_v1.json} carries the 646 nodes and the
+minimal-transfer results. A manifest (\texttt{MANIFEST.json}) records the
+SHA-256 digest and byte size of each file; the digests of the published
+versions are frozen in the Zenodo record accompanying this paper.
+
+\emph{Regeneration.} Every figure, table, and released file regenerates
+from the archived repository with pinned commands:
+\texttt{python3 src/wake\_p2/event\_catalog.py} (catalogue),
+\texttt{python3 src/wake\_p3/exclusion\_map.py} (map),
+\texttt{python3 src/wake\_p4/flyby\_network.py} (network),
+\texttt{python3 src/wake\_p5/paper\_figs\_main.py} (all five figures), and
+\texttt{tectonic wake\_en.tex} / \texttt{tectonic wake\_ja.tex} (this
+document). The catalogue is a swappable data layer; the DR4 replacement
+path is a rerun of the same commands on the successor catalogue.
+
+\emph{Simulator.} The browser simulator reads exactly the three released
+files plus the manifest; hard-coded display values are prohibited by
+construction, and the schema follows an additive-compatibility principle.
+Its first artifact is a verification harness of 16 checks that recomputes
+the paper's flagship numbers from the released JSONs, including
+$\lam(1\pc)$, $f^*$ at the standard probe range, the minimal transfer
+$\Delta v$, the GJ~710 perihelion, and the SHA-256 digest of every data
+file against the manifest. The harness is the simulator-side anchor of the
+same audit and is displayed before any visualization.
 
 \bibliographystyle{plain}
 \bibliography{wake_refs}
