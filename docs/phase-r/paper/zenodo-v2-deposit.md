@@ -1,7 +1,8 @@
 # Zenodo v2 デポジット実施記録(裁定ログ#22 完結指示)
 
-> 2026-08-17 起票 / 実行: Claude Code (Fable 5) / 状態: **トークン待ちで停止中**
-> (§0 トークン確認: ~/.zenodo_token 不在 → 指示どおり停止し前田さんに再設置を依頼)
+> 2026-08-17 起票・**同日公開完了** / 実行: Claude Code (Fable 5)
+> (経緯: §0 トークン確認で ~/.zenodo_token 不在 → 指示どおり停止・前田さんが
+> read -s 方式で再設置 → 疎通 OK → 一括実行・publish・読み戻し検証まで完了)
 
 ## 【特記 — 台帳記録指示による】停止条項が指示者側にも機能した初の実例
 
@@ -18,10 +19,10 @@ geo_verify.py から実体(2³=8 の枝符号組合せ: 候補の子枝 × 新�
 | 手順 | 状態 |
 |---|---|
 | 1. (6) 反映+ゲート再走+コミット | **完了**(4e616fe、全ゲート PASS) |
-| 2. Zenodo v2 New version | **停止中** — ~/.zenodo_token 不在。再設置後に `python3 scripts/zenodo_publish_v2.py` で一括実行(dry-run 検証済み) |
-| 3. GitHub タグ v2.0-zenodo / Release / README 更新 | 待機(リリースコミット確定後) |
-| 4. arXiv 投稿稿凍結(docs/phase-r/arxiv-submission/) | 待機(v2 PDF 確定後) |
-| 5. トークン削除+台帳転記+完了報告 | 待機 |
+| 2. Zenodo v2 New version → publish | **完了**(2026-08-17、`zenodo_publish_v2.py` 一括実行。md5 全一致・公開 API 読み戻し検証 OK) |
+| 3. GitHub タグ v2.0-zenodo / Release / README 更新 | **完了**(タグ=a382355、Release に v2 tar.gz+sha256 全文、README を concept DOI バッジ+v2 系引用に更新) |
+| 4. arXiv 投稿稿凍結(docs/phase-r/arxiv-submission/) | **完了**(TeX ソース一式+paper.pdf+FROZEN.md) |
+| 5. トークン削除+台帳転記+完了報告 | **完了**(PHASES 台帳 #21・#22 転記、~/.zenodo_token 削除) |
 
 ## v2 レコード構成(publish 時に確定値を転記)
 
@@ -31,9 +32,15 @@ geo_verify.py から実体(2³=8 の枝符号組合せ: 候補の子枝 × 新�
   isotropy, survival definition). No change to mathematical content."
 - version: v2 / creators(ORCID 0009-0005-3401-9230)・related identifiers は
   v1 から継承維持 / concept DOI 維持(新規レコード禁止)
-- **v2 版 DOI**: (publish 後転記)
-- **リリースコミット**: (転記)
-- **wake-repo-v2.tar.gz sha256**: (転記)
+- **v2 版 DOI**: **10.5281/zenodo.21979354** — https://zenodo.org/record/21979354
+- **concept DOI**: 10.5281/zenodo.21955412(全版を指す)
+- **リリースコミット**: **a382355**
+- **ファイル**: paper.pdf(360,577B・25頁、sha256
+  45b1e54b2c703824395547f9dd0f0d4d74545db6597e1c72b3b976400a93cd45)+
+  wake-repo-v2.tar.gz(1,652,320B)
+- **wake-repo-v2.tar.gz sha256**:
+  `70038d4b0e06af162766465f05424aa9525e1c3b2dcdeb715a8931bb944aa70f`
+- 公開 API 読み戻し: version=v2 / 改版理由表示 OK / files 2点 確認済み
 
 ## arXiv Comments 欄案(投稿時に前田さん最終確認)
 

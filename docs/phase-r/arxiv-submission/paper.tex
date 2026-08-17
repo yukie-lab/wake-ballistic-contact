@@ -1,0 +1,1458 @@
+\documentclass[11pt]{article}
+\usepackage[margin=2.9cm]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage[hidelinks]{hyperref}
+\usepackage{xeCJK}
+\setCJKmainfont{Hiragino Mincho ProN}
+
+% ---- named theorem environments (labels match the internal claim tree) ----
+\newtheorem{innerthm}{Theorem}
+\newenvironment{namedthm}[1]{\par\medskip\noindent\textbf{#1.}\itshape}{\par\medskip}
+\newenvironment{namedprop}[1]{\par\medskip\noindent\textbf{#1.}\itshape}{\par\medskip}
+\newtheorem{lemma}{Lemma}
+\newtheorem{remark}{Remark}
+\newtheorem{conjecture}{Conjecture}
+
+\newcommand{\dd}{\,\mathrm{d}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\PP}{\mathbb{P}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\Kmix}{K_{\mathrm{mix}}}
+\newcommand{\Ts}{T_s}
+\newcommand{\Ta}{T_a}
+\newcommand{\Tg}{T_g}
+\newcommand{\relL}{\bar\Lambda}
+\newcommand{\wbar}{\bar w}
+
+\title{Contact processes on ballistic Poisson particles:\\
+criticality, fronts, and when motion helps colonization\\[1ex]
+\large (Preprint --- Zenodo v2, doi:10.5281/zenodo.21979354; v1: doi:10.5281/zenodo.21955413)}
+\author{Yukie Maeda\thanks{Independent researcher. The role of AI systems in this
+work is disclosed in Section~\ref{sec:verification} and Appendix~B.}}
+\date{August 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\noindent\textbf{和文要旨.}
+実測恒星運動学を動機として、等速直線運動する Poisson 粒子系上の接触過程
+$M(\rho,\nu,R,p,\tau,\Ts)$(進入駆動・撃ちっ放し・対一回・再マーク許可)を導入し、
+その臨界構造を確立する。主結果: (i) 転送核のスペクトル条件 $r(K)<1$ による絶滅定理
+(定理A)、(ii) この SIR 型分枝上界は再マーク許可の完全モデルには拡張されないこと
+(逆向きチャネルによる期待総子孫数 --- 種を含むマーク事象総数 $N$ --- の
+分枝上界超過、$4.4\sigma$ の数値確定)、(iii) 静的極限とボンド希釈
+ランダム幾何グラフの生存事象の同値(定理B)、(iv) 完全モデルの生存定理(定理C2 ---
+セル・リレー構成、私有コイン結合、正規化橋、区間演算による機械認証)、
+(v) 「静的幾何が禁じる疎密度でも十分速い運動は入植を可能にする」(定理D)、
+(vi) 前線の超線形/線形二分(定理C6a/C6b$'$)。さらに伝播規約への依存性
+(進入駆動では運動が単調に助け、滞在時間要求型では最適速度が存在する)を数値的に
+確立する。検証は独立実装の数値反証装置・新規 AI インスタンスによる11サイクルの
+敵対的審査・幾何定数の機械認証の三層で行い、その全記録を開示する(付録B)。
+
+\medskip
+\noindent\textbf{Abstract.}
+Motivated by observed stellar kinematics, we introduce a contact process on
+particles moving ballistically in $\R^3$: a Poisson point process of intensity
+$\rho$ whose points carry i.i.d.\ velocities drawn from $\nu$, with
+entry-driven, fire-and-forget transmission at range $R$ (success probability
+$p$, delay $\tau$, each ordered pair attempts at most once ever), lifetimes
+$\mathrm{Exp}(\Ts)$, and re-marking of dead points allowed. We establish the
+critical structure of this model. First, an extinction theorem: if the
+spectral radius of an explicit velocity transfer kernel is smaller than one,
+the SIR-type variant dies out almost surely (Theorem~A), and the underlying
+moment computation is exact. Second, this branching-type upper bound
+\emph{does not extend} to the full model with re-marking: a
+``reverse channel'', by which a child re-marks its dead parent, produces a
+first-order excess of the expected total progeny (mark events including the
+seed) over the branching bound, certified numerically at
+$4.4\sigma$ (Section~\ref{sec:afull}). Third, in the static limit the
+survival event coincides with percolation of a bond-diluted random geometric
+graph (Theorem~B). Fourth, our main result: a survival theorem for the full
+model (Theorem~C2), proved by a cell--relay renormalization whose geometric
+constants are certified by interval arithmetic, together with a
+private-coin coupling lemma, a disclosure-capsule identification, and a
+normalization bridge between accepted and disclosed candidate sets. Fifth,
+combining Theorems~B and C2: at densities where static geometry forbids
+percolation for every $p$, sufficiently fast motion enables colonization
+(Theorem~D). Finally we prove a superlinear/linear front dichotomy
+(Theorems~C6a, C6b$'$), and establish numerically a \emph{convention
+dichotomy}: under entry-driven transmission motion helps monotonically,
+while under dwell-time requirements an optimal speed emerges. All proofs
+were developed under a three-layer verification protocol (independent
+numerical falsification device, eleven cycles of adversarial line-by-line
+review by fresh AI instances, machine certification of all proof geometry),
+fully disclosed in Appendix~B.
+\end{abstract}
+
+\tableofcontents
+
+%======================================================================
+\section{Introduction and main results}\label{sec:intro}
+
+Consider a population of particles scattered in $\R^3$ as a Poisson point
+process, each moving forever along a straight line with a random velocity.
+A single marked particle starts an epidemic: whenever an unmarked particle
+\emph{enters} the ball of radius $R$ around a living marked particle, the
+mark is transmitted with probability $p$ after a travel delay $\tau$; marks
+die at rate $1/\Ts$; dead particles can be re-marked. Does the epidemic
+survive forever? How fast does it spread? And --- the question that motivated
+this work --- \emph{does the motion of the particles help or hinder}?
+
+The model is a mathematical idealization of interstellar settlement fronts
+carried by probes among moving stars, in the convention of
+Carroll-Nellenback et al.~\cite{cn19} (``entry-driven, fire-and-forget'':
+a settled system launches a probe when an unsettled system comes within
+range, and the probe travels once). The application of the resulting
+theory to observed stellar catalogs is deliberately separated into
+companion work; the present paper is self-contained probability theory.
+
+Our model sits in a genuine gap between two literatures: epidemics on
+\emph{diffusing} populations (Brownian motions with removal, Grimmett--Li
+\cite{grimmettli}; spread of infection among random walks, Kesten--Sidoravicius
+\cite{ks05,ks08}, Dauvergne--Sly \cite{dauvergnesly}) and \emph{static}
+continuum percolation (random geometric graphs, Penrose \cite{penrose};
+Poisson cylinders, Broman--Tykesson \cite{bromantykesson}). Ballistic
+(constant-velocity) motion is the kinematically correct regime for stars on
+$\pm$few-Myr horizons, and it changes the mathematics: the space-time track
+of a particle is a straight cylinder, contacts between any ordered pair form
+a \emph{single} time interval, and the environment de-correlates by transport
+rather than by mixing. A space-time percolation picture of this kind appears,
+non-rigorously, in delay-tolerant-network engineering \cite{hyytiaott}.
+Monotonicity of criticality in the velocity scale is open even in
+neighbouring models (jump-rate monotonicity for spread of infection;
+environment-speed monotonicity in evolving-environment contact processes,
+Linker--Remenik \cite{linkerremenik}), and is known to be
+direction-dependent across settings. Infections with recovery among moving
+particles are treated in \cite{baldassostauffer}; percolated (bond-diluted)
+random geometric graphs, the static skeleton of our model, in
+\cite{franceschetti,lichev}.
+
+\subsection*{The model $M(\rho,\nu,R,p,\tau,\Ts)$}
+At time $0$, particles form a homogeneous Poisson process of intensity
+$\rho$ on $\R^3$; particle $i$ receives an i.i.d.\ velocity $v_i\sim\nu$ and
+moves as $x_i(t)=x_i+v_i t$ (the configuration is time-stationary). For an
+ordered pair $(i,j)$ the contact set $\{t:|x_i(t)-x_j(t)|\le R\}$ is a single
+interval $[\alpha_{ij},\beta_{ij}]$. Transmission is \emph{entry-driven and
+fire-and-forget}: if $i$ is marked and alive during its contact window with
+$j$, then at time $a_{ij}=\max(\alpha_{ij},m_i)$ (provided $a_{ij}<d_i$ and
+$a_{ij}\le\beta_{ij}$) the pair attempts transmission \emph{once and only
+once ever} (pair-once is an absolute convention; re-marking never re-opens a
+pair), succeeding with probability $p$; on success $j$ becomes marked at
+time $a_{ij}+\tau$. Mark lifetimes are $\mathrm{Exp}(\Ts)$; a particle whose
+mark has died may be marked again by a fresh pair (\emph{re-marking}).
+The seed is one marked particle near the origin at $t=0$. \emph{Survival}
+means the set of living marked particles is non-empty at arbitrarily large
+times.
+
+Two dimensionless quantities organize the phase diagram: with
+$\lambda:=\rho\pi R^2\,\E|v-v'|$ (entry rate; $v,v'\sim\nu$ independent) and
+$\deg:=\tfrac{4\pi}{3}\rho R^3$,
+\[
+  m := p\,(\deg+\lambda \Ts), \qquad
+  \Kmix := \frac{w_1\Ts}{R}\quad(\text{mixing number of a speed shell }w_1).
+\]
+
+\subsection*{Main results\protect\footnote{\emph{Theorem labels retain
+the claim identifiers of the verification ledger
+(Appendix~\ref{app:method}), preserving traceability to the public
+record: some identifiers remain open conjectures (C4,
+Section~\ref{sec:open}), some were absorbed into other results during the
+sprint (C5 into Theorem~B and the Section~\ref{sec:fronts} synthesis), and
+C6 split into C6a and C6b$'$. Gaps in the numbering are deliberate.}}}
+Write $r(K)$ for the spectral radius on $L^2(\nu)$ of the transfer kernel
+\[
+  K(v,v') \;=\; p\rho\Bigl(\tfrac{4\pi}{3}R^3+\pi R^2\,|v-v'|\,\Ts\Bigr).
+\]
+
+\begin{namedthm}{Theorem A (extinction, SIR variant)}
+Assume $\E|v|^2<\infty$. If $r(K)<1$, the no-re-marking (SIR) variant dies
+out almost surely. The underlying first-moment (Mecke) computation of the
+expected number of length-$k$ transmission chains is exact, so the spectral
+condition is sharp at the level of first moments.
+\end{namedthm}
+
+\begin{namedprop}{Claim (the SIR bound does not extend --- numerically certified, experiment E8c; Section~\ref{sec:afull})}
+There are parameter regions with scalar mean $\bar m<1$ in which the full
+model satisfies $\E[N]>1/(1-\bar m)$, where $N$ is the \emph{total
+progeny}: the total number of mark events, including the seed. Consequently, \emph{the SIR-type
+(branching-process) threshold description does not extend to the full model
+with re-marking}: the excess is produced by a first-order
+``reverse channel'' (a child re-marks its dead parent through the unused
+reverse pair). Whether the extinction threshold itself separates --- i.e.,
+whether the full model can survive somewhere inside $r(K)<1$ --- is open
+(Section~\ref{sec:open}).
+\end{namedprop}
+
+\begin{namedthm}{Theorem B (static limit)}
+Let $\nu=\delta_0$. Then the survival event of $M(\rho,\delta_0,R,p,\tau,\Ts)$
+coincides (up to null sets) with the event that the origin's cluster is
+infinite in the bond-diluted random geometric graph $G(\rho,R;p)$, for every
+$\Ts$ and $\tau$. In particular survival does not depend on $\Ts,\tau$ in the
+static limit.
+\end{namedthm}
+
+\begin{namedthm}{Theorem C2 (survival of the full model)}
+Let $\nu$ be isotropic with mass $q>0$ on a speed shell
+$S=\{w:|w|\in[w_1,2w_1]\}$, and with a density on $S$ bounded by
+$\relL\cdot q/\mathrm{vol}(S)$ with $\relL\le 4$ (relative density ratio;
+Maxwellian $\nu$ satisfies $\relL\approx2.4$ on its typical shell). Normalize
+$R=1$ and assume the mixing condition $\Kmix=w_1\Ts\ge K_0=20$. There is a
+constant $C_0=C_0(\tau/\Ts)<\infty$ such that
+\[
+  m_1 \;:=\; p\,\rho q\,\pi w_1\Ts \;>\; C_0
+  \qquad\Longrightarrow\qquad
+  \text{the full model survives with positive probability.}
+\]
+For general $\relL<\infty$ the same holds with $K_0=K_0(\relL)<\infty$ and
+$C_0=C_0(\tau/\Ts,K_0(\relL))$.
+\end{namedthm}
+
+\begin{namedthm}{Theorem D (motion beats static geometry)}
+Fix any $0<\rho<\rho_c^{\mathrm{RGG}}(p{=}1)$, so that by Theorem~B the
+static model dies out almost surely for \emph{every} $p\le1$, $\Ts$, $\tau$.
+Then for every $p>0$, $\tau\ge0$, $\Ts>0$ there are isotropic velocity laws
+$\nu$ (scaled copies $\nu_s$ of any law satisfying the hypotheses of
+Theorem~C2; the shell mass $q$ and the ratio $\relL$ are scale-invariant)
+such that the full model survives with positive probability. Under the
+entry-driven convention, \emph{sufficiently fast motion enables colonization
+at densities where static geometry forbids it}.
+\end{namedthm}
+
+\begin{namedthm}{Theorem C6a (superlinear front)}
+If $\Ts=\infty$ and $\nu$ is isotropic with unbounded support, then the
+front radius satisfies $R(t)/t\to\infty$ almost surely.
+\end{namedthm}
+
+\begin{namedthm}{Theorem C6b$'$ (linear bound for bounded speeds)}
+If $|v|\le w_{\max}$ a.s.\ and $\tau>0$, then for all $t\ge0$,
+$R(t)\le w_{\max}t+R\lfloor t/\tau\rfloor+|x_0|$, where $x_0$ is the seed
+position. In particular the front is at most linear, and $\tau>0$ is
+precisely what guarantees well-foundedness of ancestries (Section~\ref{sec:fronts}).
+\end{namedthm}
+
+Numerically we complement the dichotomy: unbounded (Gaussian) velocity laws
+produce an accelerating front (fitted growth exponent $1.34\pm0.14$) while
+bounded laws are linear ($0.98\pm0.01$); and we establish the
+\emph{convention dichotomy}: under the entry-driven convention survival
+probability is monotone increasing in the velocity scale, while under a
+dwell-time-requirement convention an optimal speed $\sigma^*\approx0.4$
+emerges (Section~\ref{sec:fronts}).
+
+\subsection*{Method of verification}
+Every claim in this paper was developed under a claim-driven verification
+protocol: an independent simulation device for numerical falsification,
+adversarial line-by-line review of each completed proof by fresh AI
+instances with no shared context (eleven review cycles for Theorem~C2), and
+machine certification, by interval arithmetic, of every geometric constant in
+the survival proof. Section~\ref{sec:verification} states the exact boundary
+of what this internal verification does and does not establish;
+Appendix~B is the complete method record, including the error ledger.
+
+%======================================================================
+\section{Model and conventions}\label{sec:model}
+
+We collect the conventions used throughout; they match the simulation device
+of Appendix~A exactly.
+
+\paragraph{Dynamics.} Poisson$(\rho)$ initial positions on $\R^3$;
+i.i.d.\ velocities $v_i\sim\nu$; ballistic motion $x_i(t)=x_i+v_it$.
+At every time $t$ the positions again form Poisson$(\rho)$ (time
+stationarity). Since relative velocities are constant, the contact set of an
+ordered pair is a single interval; the entry time
+$a_{ij}=\max(\alpha_{ij},m_i)$ lies in the contact window whenever an attempt
+occurs, so the transmission jump in space is at most $R$.
+
+\paragraph{Transmission conventions.} \emph{Entry-driven}: attempts are
+triggered by entry events (or by the marking of $i$ if $j$ is already inside
+range). \emph{Fire-and-forget}: no dwell requirement --- the attempt is
+resolved instantly by a fair $p$-coin, the effect arriving after delay
+$\tau$. \emph{Pair-once}: each ordered pair $(i,j)$ attempts at most once in
+the entire history; this is an absolute convention, unaffected by
+re-marking. \emph{Re-marking}: a dead particle is eligible for fresh marks
+through fresh pairs. Lifetimes are $\mathrm{Exp}(\Ts)$, independent of
+everything else; marks never kill and never displace --- the process is
+purely additive on marks.
+
+\paragraph{Scaling.} $R=1$ may be assumed (space-time scaling); $m$, $m_1$,
+$\Kmix$, $\tau/\Ts$, and the ratio $\relL$ are scale-invariant. In particular
+the pushforward $\nu_s=\nu^0(\cdot/s)$ of a shell law keeps $q$ and $\relL$
+fixed while scaling $\Kmix$ and $m_1$ linearly in $s$ --- the scale-invariance
+lemma behind Theorem~D.
+
+%======================================================================
+\section{Extinction: Theorem A}\label{sec:thmA}
+
+The proof (Appendix~C.1) is a first-moment argument made exact. For a
+time-ordered chain of transmissions
+$0\to i_1\to\cdots\to i_k$, conditioning on velocities and applying the
+multivariate Mecke equation \cite{lastpenrose} for the Poisson process of
+(position, velocity) marks reduces the expected number of such chains to a
+$k$-fold operator power. Two technical points make the computation exact
+rather than merely an upper bound.
+
+First, the \emph{capsule volume lemma}: for a source of velocity $v$ and
+window length $T$, the set of initial conditions $(x_0,v')$ whose trajectory
+enters the moving ball within the window is a capsule of exact volume
+$\tfrac{4\pi}{3}R^3+\pi R^2|v-v'|T$; no overcounting occurs because entry
+times are unique (single contact interval).
+
+Second, the \emph{deterministic attempt-time recursion}: along a chain, the
+$j$-th attempt time satisfies $t_j=\max(\inf T_j,\,t_{j-1}+\tau)$, a
+deterministic function of the geometry, which quantifies the windows without
+conditioning on the past --- this removes the window-quantification gap found
+in review (Appendix~B, cycle~1).
+
+Chains do \emph{not} factor into scalar means: the velocity of the relay
+particle is shared between consecutive links, so the correct object is the
+kernel $K$ acting on $L^2(\nu)$, not the scalar $\bar m=\int K\dd\nu\dd\nu$.
+If $r(K)<1$, the expected total progeny is finite and
+the SIR variant dies out a.s.
+
+%======================================================================
+\section{The SIR-type bound does not extend to re-marking}\label{sec:afull}
+
+It is tempting to expect Theorem~A to hold verbatim for the full model with
+$\bar m$-type conditions. It does not.
+
+\begin{namedprop}{Claim (reverse channel --- numerically certified, experiment E8c)}
+There exist parameters with $\bar m<1$ (e.g.\ near-static pairs, $p=1$,
+$\tau=10\,\Ts$, $\deg=0.1$) for which the full model satisfies
+$\E[N]>1/(1-\bar m)$, where $N$ is the total progeny (mark events
+including the seed).
+\end{namedprop}
+
+The mechanism is a \emph{first-order self-influence} that Mecke chain
+counting cannot see: a child $j$, marked via $(i,j)$, can re-mark its
+\emph{dead} parent $i$ through the never-used reverse pair $(j,i)$ --- the
+probability per infection is of order $p(1-e^{-2\tau/\Ts})$ and the channel
+lives in the corner of slow relative velocities and $\tau\gtrsim\Ts$. The
+device certifies the violation: over $10^4$ independent realizations in the
+counterexample regime, $\E[N]=1.1353\pm0.0055$ against the branching bound
+$1/(1-\bar m)=1.1111$, a $4.4\sigma$ excess (Figure~\ref{fig:reverse}).
+We emphasize the exact strength of the statement: this is a certified
+violation of the \emph{expectation bound}, hence of the SIR-type threshold
+\emph{description}; it does not by itself prove survival anywhere inside
+$r(K)<1$, and the separation of the extinction thresholds themselves remains
+open (Section~\ref{sec:open}).
+
+\begin{figure}[t]\centering
+\includegraphics[width=.6\textwidth]{figs/fig3_reverse_channel.pdf}
+\caption{Reverse channel (experiment E8c): histogram of the total progeny
+$N$ (mark events including the seed) over $10^4$ realizations in the
+counterexample regime. The measured mean exceeds the branching bound by $4.4\sigma$.
+Reproduce: \texttt{python3 src/wake\_r/paper\_figs.py} (data:
+\texttt{data/phase\_r/E8c\_counterexample.json}).}
+\label{fig:reverse}
+\end{figure}
+
+%======================================================================
+\section{Static limit: Theorem B}\label{sec:thmB}
+
+Let $\nu=\delta_0$. Then all contact windows are $[0,\infty)$ or empty,
+every attempt happens at the instant its source is marked, and delays only
+shift the marking times. The set of particles ever marked is exactly the
+cluster of the seed in the graph whose vertices are the Poisson points and
+whose edges are pairs at distance $\le R$ retained independently with
+probability $p$ --- the bond-diluted random geometric graph $G(\rho,R;p)$
+\cite{penrose,meesterroy,franceschetti}. The \emph{survival event} therefore
+coincides a.s.\ with the percolation event of the seed's cluster, for every
+$\Ts,\tau$; lifetimes only govern how long the (predetermined) cluster stays
+lit. A double numerical verification (dynamic device vs.\ independent
+union-find implementation) is recorded in Appendix~A.
+
+%======================================================================
+\section{Survival: Theorem C2}\label{sec:thmC2}
+
+This is the technical core of the paper. Full proofs are in Appendix~C.3;
+here we present the architecture and the five load-bearing lemmas. Constants
+below refer to the certified configuration $K_0=20$, $\Ta=\Ts/32$,
+$\Tg=64(\tau+\Ts)$.
+
+\subsection{Cell--relay construction}
+By the pigeonhole principle, one of the $200$ equal-width sub-shells of
+$[w_1,2w_1]$, written $I^*$, carries mass $\ge q/200$; let $\wbar$ be its
+midpoint. The \emph{aiming constant} $\bar u_x:=\wbar/\sqrt{17/16}$ makes
+the ideal required velocity $(\bar u_x,\pm\bar u_x/4,0)$ have norm exactly
+$\wbar$. Sites $(n,k)$, $n+k$ even, of a two-dimensional oriented lattice are
+realized as spatial boxes of side $2a$, $a=\bar u_x\Tg/32$, with $y$-tracks
+spaced $8a$ apart and a single $z$-track; anchoring is \emph{hybrid} ($y,z$
+global, $x$ relative to the parent, targets rounded to the lattice
+$(a/8)\mathbb{Z}^3$). A site is \emph{open} if the relay delivered at least
+$N_h$ marked, living particles with velocities in a small cover box into the
+box core (half-width $a/2$) at time $t_k$, at least one of which has residual
+lifetime $\ge\Tg$ (\emph{coverage clause} --- this keeps the marked set
+non-empty between epochs). From a good parent $P^*$, the relay uses entries
+into its radius-$1$ capsule during the \emph{entry window}
+$[t_k,t_k+\Ta]$ only.
+
+\subsection{The five lemmas}
+\begin{enumerate}
+\item \textbf{Geometry (machine-certified).} Over all perturbations (parent
+position in core${}+{}$rounding, parent velocity in the $\pm0.05\wbar$ cover,
+entry offset $\le R$, window sweep $s\in[0,\Ta]$, branch signs), the landing
+window $w_c\oplus[-h_0,h_0]^3$, $h_0=\frac{a/2}{\Tg-s}$, retains a margin
+$h_0-\mathrm{dev}-I_h-\mathrm{lip}\ge s^*=0.0048\,\wbar$ (at $\tau=0$;
+larger for $\tau>0$), stays inside the velocity cone and inside the parent
+cover. Certification is by interval arithmetic with exact norm bounds and a
+Lipschitz penalty on an $s$-grid (Appendix~A).
+\item \textbf{Erosion patch.} With $\theta^*=s^*/(1.05\wbar)$, the full
+angular patch of radius $\theta^*$ around the aim direction, times the whole
+radial band $I^*$, lands in the window: by isotropy,
+$\hat\nu(\text{accepted})\ge\frac{1}{200}\cdot\frac{1-\cos\theta^*}{2}$.
+\item \textbf{Disclosure capsule identification.} The construction reads the
+randomness of \emph{window entrants only}: the single-contact-interval
+property makes a window entry a \emph{first} contact, so pair-once
+guarantees the attempt fires inside the window; entries outside windows
+never enter the construction's $\sigma$-algebra. Hence the deduction tubes
+below have segment length exactly $|v-v_P|\Ta$ --- disclosure geometry, not
+dynamical exposure.
+\item \textbf{Normalization bridge (machine-certified).} Candidates
+contaminated by past sites are those in the sets
+$\{v: \tilde\Delta-v\,j\Tg\in\mathcal{K}\}$,
+$\mathcal{K}=B(0,2R)\oplus\mathrm{seg}\oplus\mathrm{seg}$; the union over the
+window is contained in a \emph{box-hull} $B(0,2R)\oplus H_1\oplus(-H_2)$
+whose exact Steiner volume is
+$\prod c_i+2r\sum_{i<j}c_ic_j+\pi r^2\sum c_i+\frac{4\pi}{3}r^3$ ($r=2R$).
+With the site-count bound $n_j\le\frac{\sqrt3}{8}j+1+\mathrm{diam}\,
+\mathcal{K}/(8a)$ (single $z$-track; gap $j$ fixes the generation) and the
+density hypothesis, the disclosed mass satisfies
+$\relL\,\hat\nu(\mathrm{bad})\le\tfrac12\hat\nu(\text{accepted})$ for
+$K_0=20$, $\Ta=\Ts/32$, $\relL\le4$: at $\tau=0$ (worst case) the certified
+values are $\hat\nu(\mathrm{bad})|_{\relL=1}=1.69\times10^{-9}$ versus
+$\hat\nu(\text{accepted})=2.64\times10^{-8}$, i.e.\ the bridge closes up to
+$\relL_{\max}=7.8$, about twice the assumed bound.
+\item \textbf{Private-coin coupling (Lemma X).} Conditional on the entire
+disclosure, the failure of a pair-fresh candidate to be marked-and-alive at
+the epoch end requires the shortfall of a \emph{single private exponential
+coin} of that candidate; the conditioning reads lifetimes only through
+indicator paths $(\mathbf{1}\{L>s\})_{s\le a}$, under which the relevant
+residuals remain jointly independent $\mathrm{Exp}(\Ts)$; and post-arrival
+interference can only \emph{rescue} (re-marking never harms --- additivity).
+Hence the number of delivered children stochastically dominates a Binomial
+with success probability $\beta=e^{-\Tg/\Ts}$ over a Poisson number
+of candidates with mean $\mu\ge c_4(\tau/\Ts)\,m_1/32$, surviving the
+bridge deduction at least in half.
+\end{enumerate}
+
+\subsection{Assembly}\label{sec:assembly}
+Chernoff bounds give $\PP(\text{site open}\mid\text{all disclosure})\ge
+1-\varepsilon(m_1)$ with $\varepsilon\to0$ as $m_1\to\infty$; by the tower
+property this holds sequentially in any breadth-first order, so the open
+sites dominate an i.i.d.\ Bernoulli$(1-\varepsilon)$ field on the oriented
+lattice (direct sequential conditioning; cf.\ the domination theory of
+\cite{lss97}, which our argument does not need). The comparison lattice is precisely
+$\mathcal{L}=\{(n,k)\in\mathbb{Z}\times\mathbb{Z}_{\ge0}:\ n+k\
+\text{even}\}$ with adjacency $(n,k)\to(n\pm1,k+1)$ --- \emph{the same
+adjacency structure} for which Liggett's bound
+$p_c^{\mathrm{site}}\le 3/4$ is proved \cite{liggett95}; we verified the
+identification of the two lattices explicitly (each site has exactly the two
+children $(n\pm1,k+1)$ and the two parents $(n\mp1,k-1)$, and openness is a
+site property). For $m_1>C_0$ we have $1-\varepsilon>3/4$, hence
+supercritical oriented site percolation, an infinite open cluster with
+positive probability, and --- through the coverage clause --- a marked living
+particle at every time. Ignition from the arbitrary-velocity seed is a
+positive-probability bootstrap. \qed
+
+\begin{remark}
+No upper bound on $m_1$ is used anywhere: the coverage clause, the Chernoff
+step and the observation truncation $M=\lceil2\mu\rceil$ all improve or are
+unaffected as $m_1$ grows. Intermediate $\tau$ are covered by monotonicity
+of both sides of the bridge. The pure-isotropy case (no density bound) is
+left as a conjecture (Section~\ref{sec:open}).
+\end{remark}
+
+%======================================================================
+\section{Motion beats static geometry: Theorem D}\label{sec:thmD}
+
+Fix $0<\rho<\rho_c^{\mathrm{RGG}}(p{=}1)$. By Theorem~B and the standard
+monotone coupling in $p$, the static model dies for all $p\le1,\Ts,\tau$.
+Now fix any $p>0,\tau\ge0,\Ts>0$ and any base law $\nu^0$ satisfying the
+hypotheses of Theorem~C2. Scaling $w\mapsto sw$ preserves the shell mass
+$q$ and the relative density ratio $\relL$ (the density scales by $s^{-3}$
+and the shell volume by $s^3$), while $\Kmix=s\,w_1^0\Ts$ and
+$m_1=p\rho q\pi\,s\,w_1^0\Ts$ grow linearly in $s$ with $\tau/\Ts$ fixed;
+for $s$ large both hypotheses of Theorem~C2 hold, and the full model
+survives with positive probability. \qed
+
+%======================================================================
+\section{Fronts and the convention dichotomy}\label{sec:fronts}
+
+\subsection{Superlinear and linear fronts}
+Theorem~C6a (Appendix~C.4) shows $R(t)/t\to\infty$ a.s.\ for $\Ts=\infty$
+and isotropic unbounded $\nu$: the seed alone recruits carriers of ever-larger speeds,
+an infinite-system version of the fastest-of-$N$ heuristic used in
+\cite{cn19}. Conversely, Theorem~C6b$'$: for $|v|\le w_{\max}$ and $\tau>0$,
+\[
+  R(t)\ \le\ w_{\max}\,t\ +\ R\Bigl\lfloor \tfrac{t}{\tau}\Bigr\rfloor\ +\ |x_0| .
+\]
+The proof is a strict accounting: along any ancestry of mark events,
+marking times increase by at least $\tau$ per hop --- which simultaneously
+proves the ancestry is \emph{well-founded} (no infinite descent; this, not
+locality per se, is the true role of $\tau>0$) --- and travel time telescopes
+exactly across $[0,t]$, each hop contributing a spatial jump $\le R$ at its
+attempt time. The companion pathology: at $\tau=0$, if the open cluster of
+the seed in the $p$-bond-diluted instantaneous geometric graph is infinite,
+the whole cluster is marked at time $0^+$ and $R(0^+)=\infty$ can occur.
+
+Numerically the dichotomy is sharp (Figure~\ref{fig:front}): Gaussian
+velocity laws accelerate (fitted exponent $1.34\pm0.14$), bounded laws are
+linear ($0.98\pm0.01$).
+
+\begin{figure}[t]\centering
+\includegraphics[width=.62\textwidth]{figs/fig1_front_dichotomy.pdf}
+\caption{Front dichotomy (experiment E5): front extent $R(t)$ for unbounded
+(Gaussian) versus bounded velocity laws, six runs each. Reproduce:
+\texttt{python3 src/wake\_r/paper\_figs.py} (data:
+\texttt{data/phase\_r/E5\_front.json}).}
+\label{fig:front}
+\end{figure}
+
+\subsection{The convention dichotomy}
+Does motion help colonization? Theorem~D answers ``yes, decisively'' for the
+entry-driven convention, and experiment E4c confirms strict monotonicity of
+survival probability in the velocity scale ($0.73\to0.91$ over
+$\sigma\in[0,0.16]$ at fixed $\rho,p$). But replace fire-and-forget with a
+\emph{dwell-time requirement} (transmission requires residence within range
+for a fixed time) and the answer inverts: experiment E7 exhibits a
+non-monotone survival curve with an optimal speed $\sigma^*\approx0.4$
+(survival fraction $0.06\to0.31\to0.00$), consistent with the optimal-velocity
+phenomenology observed in mobile-agent epidemic models
+\cite{peruanisibona,rodriguez19}. \emph{The answer to ``does motion help''
+is a function of the transmission convention}, exhibited here within a
+single model family (Figure~\ref{fig:dichotomy}). A related trio of
+non-monotonicities (in particle number, in re-marking, in timing --- all
+SIR-type interference effects) is recorded in the method archive.
+
+\begin{figure}[t]\centering
+\includegraphics[width=.95\textwidth]{figs/fig2_convention_dichotomy.pdf}
+\caption{Convention dichotomy (experiments E4c, E7): survival probability
+versus velocity scale $\sigma$. Left: entry-driven fire-and-forget ---
+monotone increasing. Right: dwell-time requirement --- optimal speed
+$\sigma^*\approx0.4$. Error bars are binomial standard errors. Reproduce:
+\texttt{python3 src/wake\_r/paper\_figs.py} (data:
+\texttt{data/phase\_r/\{E4c\_dip,E7\_dwell\}.json}).}
+\label{fig:dichotomy}
+\end{figure}
+
+%======================================================================
+\section{Verification: method and boundary}\label{sec:verification}
+
+Every mathematical claim above was developed under a claim-driven protocol
+with three layers: (i) an independent simulation device (analytic
+closest-approach entry detection, time-step independent) used to attempt
+numerical falsification of every stated claim; (ii) adversarial,
+line-by-line review of each completed proof by fresh AI instances sharing no
+context with the author system --- Theorem~C2 passed on the eleventh cycle,
+and the complete cycle ledger, including more than ten caught errors (five
+geometric-arithmetic, one non-convexity, one tube-direction, one
+normalization-bridge gap, one exposure-length gap, one over-general lemma),
+is disclosed in Appendix~B; (iii) machine certification, by interval
+arithmetic, of every geometric constant of the survival proof, including the
+normalization bridge (Appendix~A). All bibliography entries carry an arXiv
+identifier or DOI and were mechanically resolved by the verification script
+of Appendix~A; the resolution log is included in the bundled repository
+archive (\texttt{wake-repo-v1.tar.gz}).
+
+\textbf{Boundary.} This internal verification --- independent AI review
+instances plus machine certification --- \emph{is not a substitute for human
+peer review}. The role of AI systems in this work, and the exact experimental
+conditions under which the mathematics was produced (including the empty
+steering-intervention log), are disclosed in Appendix~B, which also serves
+as the AI-use disclosure in the sense of current arXiv policy. The author
+takes full responsibility for all content.
+
+%======================================================================
+\section{Open problems}\label{sec:open}
+
+\begin{enumerate}
+\item \textbf{Pure isotropy.} Remove the bounded-density hypothesis
+($\relL$) from Theorem~C2.
+\item \textbf{Threshold separation.} Does the full model survive anywhere
+inside $r(K)<1$? (The reverse channel breaks the branching \emph{bound};
+whether it moves the \emph{threshold} is open.)
+\item \textbf{Repaired full-model extinction.} An extinction condition for
+the full model incorporating the reverse channel into the transfer kernel;
+without additional assumptions this appears hard (Appendix~B, cycle~4).
+\item \textbf{Velocity monotonicity (C4).} Pathwise coupling monotonicity of
+survival in the velocity scale for the entry-driven model; open, in line
+with neighbouring open problems \cite{ks05,linkerremenik}. The
+non-monotonicity trio shows naive couplings must fail.
+\item \textbf{Front shape theorem.} Existence of the limiting front shape
+and speed for bounded $\nu$; explicit constants for $C_0$ and critical
+exponents.
+\end{enumerate}
+
+\section*{Acknowledgements}
+The mathematical exploration, proofs, and their revisions were carried out
+by AI systems (Claude Code, model Claude Fable 5) under the verification
+protocol of Section~\ref{sec:verification}, with the human author acting as
+arbiter (go/stop/harvest rulings and encouragement only; the
+steering-intervention log is empty). See Appendix~B for the complete
+disclosure.
+
+%======================================================================
+\appendix
+
+\section{Machine certification bundle}\label{app:cert}
+
+\subsection{Contents}
+The complete repository snapshot is bundled with this Zenodo record as
+\texttt{wake-repo-v1.tar.gz} (all version-tracked files at the release
+commit; regenerate with \texttt{git archive}). It contains:
+\texttt{src/wake\_r/geo\_verify.py} (certifying verifier, version~6;
+deterministic, standard library only),
+\texttt{docs/phase-r/certification-log-v6.txt} (full scan log),
+\texttt{src/wake\_r/device.py} (falsification device),
+\texttt{src/wake\_r/paper\_figs.py} (figure generation),
+\texttt{data/phase\_r/*.json} (experiment archive E1--E8c), and
+\texttt{scripts/verify\_refs.py} with its resolution log (bibliography
+verification). Reproduction: \texttt{python3 src/wake\_r/geo\_verify.py}.
+
+\subsection{Design}
+All proof geometry is certified by interval arithmetic: every perturbation
+(parent position within core plus rounding, parent velocity within the
+$\pm0.05\wbar$ cover, entry offset $\le R$, window sweep, branch signs,
+target rounding) is propagated as component intervals; Euclidean norms are
+bounded by the exact closed forms
+$\min\|x\|^2=\sum_i\mathrm{dist}(0,[l_i,h_i])^2$ and
+$\max\|x\|^2=\sum_i\max(l_i^2,h_i^2)$; the window sweep uses a $4096$-cell
+grid with a Lipschitz penalty
+$|\partial_s w_{\mathrm{req}}|\le(\sup|v_p|+\sup|w_{\mathrm{req}}|)/(\Tg-\Ta)$
+and the conservative left endpoint for $h_0$. The bridge certification
+computes the acceptance mass $\frac{1}{200}\cdot\frac{1-\cos\theta^*}{2}$
+and the disclosed mass via the exact box--ball Steiner volume and the
+site-count series $\frac{\sqrt3}{8}\zeta(2)+(1+\mathrm{diam}\,
+\mathcal{K}/8a)\zeta(3)$, with the worst shell endpoint taken separately on
+each side. All approximations are monotone in the conservative direction;
+the box-hull correctness is the direct inclusion
+$\bigcup_v\mathcal{K}(v)\subseteq B(0,2R)\oplus H_1\oplus(-H_2)$.
+
+\subsection{Certified table (excerpt)}\label{app:certtable}
+\begin{center}
+\begin{tabular}{rrrrrr}
+\toprule
+$K_0$ & $\tau/\Ts$ & slack$/\wbar$ & bad ($\relL{=}1$) & accepted & $\relL_{\max}$\\
+\midrule
+20 & 0 & $+0.00483$ & $1.688\times10^{-9}$ & $2.640\times10^{-8}$ & $\mathbf{7.82}$\\
+20 & 1 & $+0.00536$ & $2.100\times10^{-10}$ & $3.253\times10^{-8}$ & $77.47$\\
+20 & 3 & $+0.00562$ & $2.618\times10^{-11}$ & $3.583\times10^{-8}$ & $684.33$\\
+24 & 0 & $+0.00499$ & $1.091\times10^{-9}$ & $2.821\times10^{-8}$ & $12.93$\\
+\bottomrule
+\end{tabular}
+\end{center}
+Verdict: $K_0=20$, $\relL\le4$, $\Ta=\Ts/32$ --- PASS (bridge and geometry),
+with margin factor $\approx1.95$ over the assumed $\relL\le4$. For
+comparison, the pre-repair configuration $K_0=5$ yields
+$\relL_{\max}=0.03$: the bridge genuinely fails there, exactly as found in
+review cycle~10 (Appendix~B). Independent reproductions of these numbers by
+fresh review instances are recorded in Appendix~B.
+
+\section{Method record (self-contained)}\label{app:method}
+
+\emph{This appendix is a self-contained disclosure document; it can be read
+independently of the main text. It records the experimental conditions under
+which the mathematics of this paper was produced: the protocol separating
+encouragement from mathematical steering, the (empty) intervention log, the
+complete review-cycle ledger with all caught errors, and the evolution of
+the machine-verification layer.}
+
+\subsection{Design}
+The executor (an AI system: Claude Code, model Claude Fable 5) held full
+authority over mathematical exploration --- proof strategies, experiment
+design, retraction decisions. The human author acted solely as arbiter
+(go/stop/harvest rulings) and encourager; an independent AI chat instance
+relayed verification verdicts only. Claim-driven verification: on every
+declared claim, (i) numerical falsification against an independently
+implemented simulation device, (ii) literature check; on every completed
+proof, line-by-line adversarial review by a \emph{fresh} AI instance sharing
+no conversational context, one new instance per cycle.
+
+\subsection{Steering protocol and intervention log}
+Permitted interactions: encouragement, confidence, generic advice
+(``stepping away is allowed''), and the go/stop/harvest ruling. Forbidden:
+mathematical hints, literature pointers, evaluations of proof directions.
+Any steering intervention was to be logged as a change of experimental
+conditions. \textbf{The intervention log is empty}: from sprint start
+(2026-08-15) to close (2026-08-16), no forbidden intervention occurred; all
+human inputs were start permissions, encouragement, and rulings.
+
+\subsection{Review-cycle ledger}
+\begin{center}
+\footnotesize
+\begin{tabular}{clp{3.1cm}p{6.9cm}}
+\toprule
+\# & target & verdict & errors caught / outcome\\
+\midrule
+self & Thm.~A v1 & self-rejected & chain factors share velocities; scalar $\bar m^k$ invalid $\to$ spectral $r(K)$\\[1pt]
+1 & Thm.~A/C6a & accepted after fix & window quantification gap $\to$ deterministic attempt-time recursion\\
+2 & C2 v1 & rejected & empty landing set; co-moving particles break finite range; no thinning monotonicity\\
+3 & C2 v2 & core isolated & D-separation impossible; general memoryless lemma false (negative-information)\\
+4 & A-full & \textbf{retracted (false)} & reverse-channel counterexample $\to$ device-certified $4.4\sigma$; became Section~\ref{sec:afull}\\
+5--8 & C2 v3--v6 & partial accepts & five geometric-arithmetic errors; $\|w\|$ non-convexity $\to$ interval arithmetic\\
+9 & C2 v7 & remanded & tube direction (relative velocity); honest Minkowski sums fail $\to$ window shortening\\
+10 & C2 v8 & \textbf{incomplete} & normalization bridge missing (real: $33$--$440\times$ short); exposure-length gap\\
+11 & C2 v9 & \textbf{accepted} & over-general sector lemma $\to$ replaced by box-hull Steiner; numbers reproduced\\
+spot & box-hull, Thm.~D & accepted & scale-invariance lemma made explicit; false ``superset'' justification removed\\
+C6b & Prop.~C6b & accepted (minor) & tightened to $\lfloor t/\tau\rfloor$; well-foundedness made explicit\\
+\bottomrule
+\end{tabular}
+\end{center}
+Tally: more than ten errors caught; two became discoveries (reverse channel,
+non-monotonicity trio), one became a strengthening (window shortening); one
+theorem retracted and re-cast as a correct impossibility statement
+(Section~\ref{sec:afull}, with the claim strength corrected in final
+editing: what is proved is that the branching-type bound does not extend,
+not that the thresholds separate).
+
+\subsection{Machine-verification evolution}
+Monte-Carlo minimum (rejected in review: not a worst-case proof) $\to$
+corner enumeration with Lipschitz penalties (rejected: anti-conservative on
+concave directions of the norm) $\to$ interval arithmetic with exact norm
+bounds and bridge certification (final; also caught two design errors before
+they reached review). Operational conclusion: \emph{every geometric constant
+of a proof of this kind should be machine-certified}; hand-computed geometry
+failed five times in review.
+
+\subsection{Disclosure statement}
+The mathematical content of this paper (formulations, proofs, retraction
+decisions included) was explored by an AI executor; verification used the
+three layers above. The human author's role was direction-level arbitration
+and encouragement; the steering log is empty. This internal verification is
+not a substitute for human peer review; the reader and referee should treat
+this record, including the error ledger, as the disclosure of the
+verification boundary.
+
+\section{Proof details}\label{app:proofs}
+
+This appendix contains the complete proofs of Theorems~A, B, C2, C6a,
+C6b$'$ and D, in their accepted forms (the review record is
+Appendix~\ref{app:method}). Notation is that of
+Section~\ref{sec:model}. All certified numerical values (margins,
+disclosed and accepted masses, $\relL_{\max}$) are cited from the
+certified table of Appendix~\ref{app:certtable} --- the single-source
+principle; the certifying program is described in Appendix~\ref{app:cert}.
+
+%----------------------------------------------------------------------
+\subsection{Theorem A: extinction of the SIR variant}\label{app:thmA}
+
+Throughout this subsection the SIR (no-re-marking) variant is in force: a
+particle carries a mark at most once in its history; all other conventions
+are those of Section~\ref{sec:model}. We assume $\E|v|^2<\infty$ and prove:
+if $r(K)<1$, the expected total number of mark events is finite and the SIR
+variant dies out almost surely; moreover the underlying chain count is an
+equality, so the spectral condition is sharp at the level of first moments.
+As in Section~\ref{sec:thmA}, chains do not factor into scalar means ---
+the relay velocity is shared by consecutive links --- so the correct object
+is the kernel $K$ on $L^2(\nu)$.
+
+\paragraph{(a) Generations and the chain tree.}
+Add the seed as an extra particle at the origin with velocity $v_0\sim\nu$
+(Palm version); it is marked at time $m_0=0$, with mark lifetime
+$L_0\sim\mathrm{Exp}(\Ts)$. The marked set is constructed by generation
+induction: generation $0$ is the seed; a particle belongs to generation at
+most $k{+}1$ if it receives a successful attempt from a particle of
+generation at most $k$. Every mark event other than the seed has a unique
+parent (the source of the successful attempt that created it; in the SIR
+variant mark events are identified with particles), and by the inductive
+construction every marked particle is joined to the seed by a finite parent
+chain: the parent relation is a well-founded tree and depth is well
+defined. A depth-$k$ mark determines the time-ordered chain
+$(i_0=\text{seed},i_1,\dots,i_k)$ of \emph{distinct} particles along its
+ancestry.
+
+\paragraph{(b) The deterministic attempt-time recursion.}
+For an ordered pair write $T_{ij}=[\alpha_{ij},\beta_{ij}]$ for its contact
+interval (a single interval, by ballistic motion). Along a chain abbreviate
+$T_j:=T_{i_{j-1}i_j}$ and define recursively
+\[
+  m_0:=0,\qquad t_j:=\max(\inf T_j,\ m_{j-1}),\qquad
+  m_j:=t_j+\tau \quad(1\le j\le k).
+\]
+Call the chain \emph{open} if for every $j$ the pair coin of
+$(i_{j-1},i_j)$ succeeds and
+\[
+  T_j\cap[m_{j-1},\,m_{j-1}+L_{j-1})\ \neq\ \emptyset,
+\]
+where $L_{j-1}$ is the lifetime of $i_{j-1}$'s mark. If the chain is
+realized by actual mark events, the actual attempt times are exactly
+$a_j=\max(\alpha_j,m_{j-1})=t_j$, and the attempt requires the parent to be
+alive ($t_j<m_{j-1}+L_{j-1}$) and in contact ($t_j\in T_j$); hence realized
+chains are open --- the open-chain event is a necessary condition
+(a relaxation), and the number of depth-$k$ marks is at most the number
+$N_k$ of open chains of length $k$. Two features make the event usable.
+First, $t_j$ is a \emph{deterministic} function of the contact geometry, so
+the windows are quantified without conditioning on the past dynamics; this
+removes the window-quantification gap found in review --- in the first
+version, nested existential witnesses inflated the window by the contact
+duration, which cannot be absorbed into the kernel (Appendix~\ref{app:method},
+cycle~1). Second, the window $[m_{j-1},m_{j-1}+L_{j-1})$ has length exactly
+$L_{j-1}$, and $\tau$ enters only through the translation $m_j=t_j+\tau$ of
+the windows; by the translation invariance of the capsule volume below,
+$\tau$ contributes nothing to the moment computation --- \emph{this is why
+the kernel $K$ contains no $\tau$}.
+
+\paragraph{(c) The capsule volume lemma.}
+\begin{lemma}[capsule volume]\label{lem:capsule}
+Let a source move as $x(t)=x+vt$ and fix a time window $[s,s+\ell)$,
+$\ell>0$. For $w\in\R^3$, the set of initial positions $y\in\R^3$ whose
+trajectory $y+wt$ satisfies
+$\{t:|y+wt-x(t)|\le R\}\cap[s,s+\ell)\neq\emptyset$ is a capsule of volume
+exactly
+\[
+  \tfrac{4\pi}{3}R^3+\pi R^2\,|v-w|\,\ell,
+\]
+independent of the window position $s$ and of $x$.
+\end{lemma}
+
+\noindent\emph{Proof.} In relative coordinates $z=y-x$, $u=w-v$ the
+condition reads $z+ut\in B(0,R)$ for some $t\in[s,s+\ell)$, i.e.\
+$z\in B(0,R)\oplus\{-ut:t\in[s,s+\ell)\}$: a translate of the ball swept
+along a segment of length $|u|\ell$ --- a spherocylinder of volume
+$\frac{4\pi}{3}R^3+\pi R^2|u|\ell$ (the half-open end is Lebesgue-null).
+\qed
+
+\smallskip
+Because the contact set of every ordered pair is a single interval, the
+entry time into any window is unique; hence in the chain count below the
+integrated indicator is exactly capsule membership --- no configuration is
+counted with multiplicity, and the volume above is exact, not an upper
+bound.
+
+\paragraph{(d) The Mecke computation.}
+The particles form a Poisson process $\Xi$ on phase space
+$\R^3\times\R^3$ with intensity $\rho\dd x\otimes\nu(\dd v)$. The number of
+open chains of length $k$ is
+\[
+  N_k=\sum_{\substack{(y_1,w_1),\dots,(y_k,w_k)\in\Xi\\ \text{distinct}}}
+  \mathbf 1\bigl\{(\text{seed},(y_1,w_1),\dots,(y_k,w_k))\ \text{open}\bigr\}.
+\]
+The open-chain event depends only on the $k$ tuple points, the seed, the
+lifetimes $L_0,\dots,L_{k-1}$ and the $k$ pair coins --- not on the
+remaining configuration --- and the $k$ ordered pairs along a chain of
+distinct points are pairwise distinct, so their coins are i.i.d.\ and
+contribute the factor $p^k$. By the multivariate Mecke equation for Poisson
+processes \cite{lastpenrose},
+\[
+  \E[N_k]=\rho^k p^k\int_{(\R^3)^k}\!\!\int_{(\R^3)^k}
+  \E\bigl[\mathbf 1\{\text{window conditions hold}\}\bigr]
+  \,\nu(\dd w_1)\cdots\nu(\dd w_k)\,\dd y_1\cdots\dd y_k,
+\]
+the inner expectation being over $v_0$ and the lifetimes. Integrate by
+Tonelli from the inside out. The window of step $k$ is
+$[m_{k-1},m_{k-1}+L_{k-1})$, and $m_{k-1}$ depends only on
+$y_1,\dots,y_{k-1}$ and the velocities --- not on $y_k$; by
+Lemma~\ref{lem:capsule} the $y_k$-integral equals
+$\frac{4\pi}{3}R^3+\pi R^2|w_{k-1}-w_k|L_{k-1}$ regardless of the window
+position. The lifetime $L_{k-1}$ occurs in step $k$ only; averaging it
+($\E L=\Ts$) and multiplying by $\rho p$ yields exactly
+$K(w_{k-1},w_k)$. Iterating for $j=k-1,\dots,1$ (the seed's window is
+$[0,L_0)$, of length $L_0$) gives the \emph{equality}
+\[
+  \E[N_k]\;=\;\int\nu(\dd v_0)\,(K^k\mathbf 1)(v_0)
+  \;=\;\langle\mathbf 1,K^k\mathbf 1\rangle_{L^2(\nu)} .
+\]
+
+\paragraph{(e) The spectral step.}
+The kernel $K(v,v')=p\rho\bigl(\frac{4\pi}{3}R^3+\pi R^2|v-v'|\Ts\bigr)$ is
+symmetric and nonnegative, and
+\[
+  \iint K(v,v')^2\,\nu(\dd v)\nu(\dd v')\ \le\
+  2(p\rho)^2\Bigl[\bigl(\tfrac{4\pi}{3}R^3\bigr)^2
+  +(\pi R^2\Ts)^2\,\E|v-v'|^2\Bigr]<\infty
+\]
+because $\E|v|^2<\infty$. Hence $K$ is a Hilbert--Schmidt integral operator
+on $L^2(\nu)$: bounded and self-adjoint, with $\|K\|=r(K)$; no positivity
+theory (Krein--Rutman) is needed. Since $\|\mathbf 1\|_{L^2(\nu)}=1$,
+\[
+  \E[\#\text{depth-}k\ \text{marks}]\ \le\ \E[N_k]
+  =\langle\mathbf 1,K^k\mathbf 1\rangle\ \le\ \|K\|^k=r(K)^k .
+\]
+If $r(K)<1$, the expected total number of mark events (seed included) is at
+most $\sum_{k\ge0}r(K)^k=(1-r(K))^{-1}<\infty$. Almost surely there are
+finitely many mark events; each carries a finite lifetime, so
+$\max_i(m_i+L_i)<\infty$ and the set of living marked particles is empty
+from that time on: the SIR variant dies out almost surely. \qed
+
+%----------------------------------------------------------------------
+\subsection{Theorem B: the static limit}\label{app:thmB}
+
+\noindent\emph{Proof.} Let $\nu=\delta_0$, so all particles are static and
+pair distances are constant in time. (1)~\emph{Windows}: the contact set of
+an ordered pair is $[0,\infty)$ if the distance is at most $R$, and empty
+otherwise. (2)~\emph{Instant attempts at marking times}: when a particle
+$i$ becomes marked, at time $m_i$, every in-range pair $(i,j)$ is already
+inside its window, so $a_{ij}=\max(\alpha_{ij},m_i)=m_i$: the attempt fires
+at the instant of marking (the fresh mark is alive at its birth almost
+surely), is resolved instantly by the pair coin, and on success $j$ is
+marked at $m_i+\tau$. (3)~\emph{Delays shift times only}: by induction,
+a particle marked through $k$ hops is marked at time exactly $k\tau$; which
+particles are ever marked is decided by the coins and the geometry alone
+--- $\Ts$ and $\tau$ never enter. (4)~\emph{Cluster identification}: the
+ever-marked set is therefore the forward-reachable set of the seed in the
+digraph on the Poisson points whose in-range arcs are passable according to
+their pair coins. In the breadth-first exploration of this reachable set,
+every in-range unordered pair with exactly one endpoint ever marked is
+consulted in one direction only (from the marked side), while pairs inside
+the marked set do not affect the cluster; declaring each in-range edge open
+according to the consulted coin (ties and never-consulted pairs by a fixed
+convention --- such coins are no-ops for the marked set) realizes a
+bond-diluted random geometric graph $G(\rho,R;p)$ on the same probability
+space, in which the ever-marked set is exactly the cluster of the seed
+\cite{penrose,meesterroy}. If the cluster is finite, there are finitely
+many mark events, each of finite lifetime, and the living marked set is
+eventually empty forever. If the cluster is infinite, marks are created at
+every epoch $k\tau$ (at time $0^+$ if $\tau=0$), and each freshly marked
+particle is alive at its marking instant, so living marked particles exist
+at arbitrarily large times, and lifetimes only govern how long the predetermined
+cluster stays lit. Hence the survival event coincides, up to null sets,
+with the percolation event $\{$the seed's cluster in $G(\rho,R;p)$ is
+infinite$\}$, for every $\Ts$ and $\tau$. \qed
+
+%----------------------------------------------------------------------
+\subsection{Theorem C2: survival of the full model}\label{app:thmC2}
+
+This subsection is the complete proof of Theorem~C2 in its accepted form
+(review cycle 11 together with the accepted wording fixes;
+Appendix~\ref{app:method}). The architecture is summarized in
+Section~\ref{sec:thmC2}; here every lemma is stated and proved.
+
+\smallskip\noindent\emph{Statement (Section~\ref{sec:intro}).} $\nu$
+isotropic; shell $S=\{w:|w|\in[w_1,2w_1]\}$ of mass $q:=\nu(S)>0$; on $S$,
+$\nu$ has a Lebesgue density bounded by $\relL\cdot q/\mathrm{vol}(S)$ with
+$\relL\le4$; $R=1$; mixing condition $\Kmix=w_1\Ts\ge K_0=20$. Then there
+is $C_0=C_0(\tau/\Ts)<\infty$ such that $m_1=p\rho q\pi w_1\Ts>C_0$ implies
+survival with positive probability. \emph{General-$\relL$ clause}: for
+every $\relL<\infty$ there is $K_0(\relL)<\infty$ --- the deduction side of
+the bridge below decays like $K_0^{-2}$ while the acceptance side is
+monotone; the certified scan gives $\relL\le7.8$ at $K_0=20$ and
+$\relL\le12.9$ at $K_0=24$ (Appendix~\ref{app:certtable}) --- and
+$C_0=C_0(\tau/\Ts,K_0(\relL))$. The pure-isotropy case (no density bound)
+is open (Section~\ref{sec:open}).
+
+\subsubsection{Parameters, lattice, and the site event}\label{app:c2lattice}
+
+Throughout $R=1$; the certified configuration is the \emph{entry window}
+$\Ta:=\Ts/32$ and the \emph{generation time} $\Tg:=64(\tau+\Ts)$, at
+$K_0=20$.
+
+\emph{Sub-shell pigeonhole.} Split $[w_1,2w_1]$ into $200$ sub-shells of
+equal width; one of them, written $I^*$, carries mass at least $q/200$; its
+half-width is $I_h\le\wbar/400$, where $\wbar$ denotes the midpoint of
+$I^*$.
+
+\emph{Aiming constant.} $\bar u_x:=\wbar/\sqrt{17/16}$; the ideal required
+velocities $(\bar u_x,\pm\bar u_x/4,0)$ have norm exactly $\wbar$ (the
+$\sqrt{1+1/16}$ cancellation). The aim is exact by definition; all
+residuals are carried by the perturbation budget of the geometry contract
+below.
+
+\emph{Lattice.} Sites $(n,k)$, $n+k$ even, $k\ge0$, of a two-dimensional
+oriented lattice with children $(n\pm1,k+1)$, are realized as spatial boxes
+of side $2a$, $a:=\bar u_x\Tg/32$, with box core of half-width $a/2$,
+$y$-tracks spaced $\ell_y:=8a$ apart and a single $z$-track ($z\equiv0$);
+epoch times are $t_k:=k\Tg$. Anchoring is \emph{hybrid}: $y,z$ on the
+global lattice, $x$ relative to the parent (this absorbs drift), targets
+rounded to $\Lambda=(a/8)\mathbb{Z}^3$ (component error at most $a/16$).
+
+\emph{Cones and cover.} $D_\pm:=\{w:\ w_x/|w|\ge0.8,\ w_y/w_x\in
+\pm[1/8,1/2]\}$ (the $z$ component is constrained by the landing window);
+all parent velocities occurring in the construction lie in the \emph{cover
+box} of half-width $0.05\,\wbar$ around $(\bar u_x,\pm\bar u_x/4,0)$ ---
+that the accepted candidates' velocity windows are contained in the cover
+is part of the machine check.
+
+\emph{Landing window.} A candidate entering the parent's radius-$1$
+capsule at time $t_k+s$, $s\in[0,\Ta]$, reaches the target core at
+$t_{k+1}$ if and only if its velocity lies in $w_c\oplus[-h_0,h_0]^3$,
+where $w_c$ is the required velocity of the perturbed instance and
+$h_0:=\frac{a/2}{\Tg-s}$.
+
+\emph{Site event (open bit).} $G_{n,k}$: at time $t_k$ the box core of site
+$(n,k)$ contains at least $N_h$ \emph{qualified} particles (marked, alive,
+velocity in the cover box) \emph{delivered by the tracked relay} ---
+qualified particles of other provenance are never queried
+(measurability) --- at least one of which has residual lifetime $\ge\Tg$
+(the \emph{coverage clause}; by memorylessness each qualified particle
+satisfies this with probability $\beta:=e^{-\Tg/\Ts}$, and the clause keeps
+the marked living set non-empty at every time between epochs). The relay
+from a good parent $P^*$ (a coverage particle: residual lifetime
+$\ge\Tg\supset$ entry window) reads entries into its radius-$1$ capsule
+during the entry window $[t_k,t_k+\Ta]$ only.
+
+\subsubsection{The geometry contract}\label{app:c2geo}
+
+\begin{lemma}[geometry contract; machine-certified]\label{lem:geo}
+For $\Kmix\ge20$ and all perturbations --- parent position in core plus
+rounding, parent velocity in the cover box, entry offset $\le R$, window
+sweep $s\in[0,\Ta]$, target rounding, branch signs --- the landing window
+retains the margin
+\[
+  h_0-\mathrm{dev}-I_h-\mathrm{lip}\ \ge\ s^*,
+\]
+where $\mathrm{dev}$ is a rigorous upper bound on the deviation of $|w_c|$
+from $\wbar$ and $\mathrm{lip}$ is the Lipschitz penalty of the $s$-grid
+cell; moreover the window box is contained in the cone $D_\pm$ and in the
+parent cover box. The certified slack is $s^*=0.0048\,\wbar$ at $\tau=0$
+(worst case) and larger for $\tau>0$ (Appendix~\ref{app:certtable}).
+\end{lemma}
+
+\noindent\emph{Proof.} Machine certification by interval arithmetic
+(verifier version~6; design in Appendix~\ref{app:cert}): each perturbation
+is propagated as component intervals; Euclidean norms are bounded by the
+exact closed forms $\min\|x\|^2=\sum_i\mathrm{dist}(0,[l_i,h_i])^2$ and
+$\max\|x\|^2=\sum_i\max(l_i^2,h_i^2)$; the window sweep uses a $4096$-cell
+grid with the Lipschitz penalty
+$|\partial_s w_{\mathrm{req}}|\le(\sup|v_p|+\sup|w_{\mathrm{req}}|)/(\Tg-\Ta)$
+and the conservative left endpoint for $h_0$ ($h_0$ is increasing in $s$).
+\qed
+
+\subsubsection{The erosion patch}\label{app:c2patch}
+
+\begin{lemma}[erosion patch]\label{lem:patch}
+Set $\theta^*:=s^*/(1.05\,\wbar)$ and let
+$U:=\{u\in S^2:\ \angle(u,\,w_c/|w_c|)\le\theta^*\}$. Then the full patch
+$\{r\,u:\ u\in U,\ r\in I^*\}$ is contained in the landing window, and by
+isotropy
+\[
+  \hat\nu(\mathrm{accepted})\ \ge\ \frac{1}{200}\cdot
+  \frac{1-\cos\theta^*}{2},
+\]
+where $\hat\nu:=\nu/q$ is the normalized shell measure.
+\end{lemma}
+
+\noindent\emph{Proof.} For $u\in U$ and $r\in I^*$, using
+$|w_c|\le1.05\,\wbar$ (certified) and chord $\le$ angle,
+\[
+  |r\,u-w_c|_\infty\ \le\ |r\,u-w_c|\ \le\ \bigl|r-|w_c|\bigr|
+  +|w_c|\,\bigl|u-w_c/|w_c|\bigr|\ \le\ (I_h+\mathrm{dev})
+  +1.05\,\wbar\,\theta^*\ \le\ h_0
+\]
+by Lemma~\ref{lem:geo} ($\ell_\infty\le\ell_2$), so the patch lands in the
+window. The isotropic decomposition of $\hat\nu$ into radial mass (at least
+$1/200$ on $I^*$) times the uniform angular measure (cap mass
+$(1-\cos\theta^*)/2$) gives the bound. That the patch lies inside $D_\pm$
+is part of the interval check of Lemma~\ref{lem:geo}. \qed
+
+\subsubsection{The disclosure capsule}\label{app:c2capsule}
+
+\begin{lemma}[disclosure-capsule identification]\label{lem:capsuleid}
+The construction reads, of the underlying randomness, only: the
+window-entry capsules
+$\mathcal{C}=\{(x_0,v):\ \inf T_{P^*\!,\;\cdot}\in[t_k,t_k+\Ta]\}$ of its
+sites, the pair coins of window entrants, the tracking judgments
+(indicator paths $(\mathbf 1\{L>s\})$ only, truncated at
+$M=\lceil2\mu\rceil$ tracked candidates, with $\mu$ as in
+Appendix~\ref{app:c2flux}), and the private coins.
+\end{lemma}
+
+\noindent\emph{Proof.} (i)~Under ballistic motion the contact set of an
+ordered pair is a single interval, so a window entry is a \emph{first}
+contact and the pair $(P^*,j)$ is unconsumed at that instant; pair-once is
+an absolute convention (re-marking never re-opens a pair), so the attempt
+of a window entrant fires inside the window with certainty and the
+construction reads only its outcome. (ii)~Entries outside windows never
+appear in the construction's $\sigma$-algebra; the dynamics may consume
+other ordered pairs there and change mark states, but this does not affect
+pair-freshness at a new site, and unknown mark states are absorbed by the
+case analysis of Lemma~\ref{lem:X} (interference is rescue-only).
+(iii)~The window is the uniform $\Ta$ for every generation, the seed's
+site included. \qed
+
+\smallskip
+\emph{Consequence.} The deduction tubes of Lemma~\ref{lem:bridge} have
+segment length exactly $|v-v_P|\Ta$: this is \emph{disclosure geometry},
+not dynamical exposure. The $\mathrm{Exp}(\Ts)$-tail exposure extension
+caused by re-marking arises only on the dynamical side, which is the
+jurisdiction of Lemma~\ref{lem:X}, not of the disclosure.
+
+\smallskip
+\emph{Candidates.} The candidates of a site are the window entrants whose
+pair $(P^*,j)$ is \emph{fresh}. Freshness of the randomness is guaranteed
+not by the definition but by the deduction: the window entrants of past
+sites --- precisely the objects the construction has read --- coincide by
+definition with the bad set of Lemma~\ref{lem:bridge} and are removed by it
+exactly; the identity of the read $\sigma$-algebra with the deduction
+target is the crux of the bridge. No explicit exclusion of returning
+former parents or past entrants is needed.
+
+\subsubsection{The normalization bridge}\label{app:c2bridge}
+
+\begin{lemma}[normalization bridge; machine-certified]\label{lem:bridge}
+Candidate velocities carry the intensity
+$\dd\Phi(v)\propto\rho\,\pi R^2\,|v-v_P|\,\nu(\dd v)$; the relative-speed
+factor is bounded above and below by design constants and is accounted in
+the flux count of Appendix~\ref{app:c2flux}. Measuring acceptance and
+deduction in the \emph{same} normalized shell measure $\hat\nu=\nu/q$, with
+the bad set measured unconditionally on dynamics and mark states
+(geometrically, $v$ restricted to the window box of its child branch; the
+eight-branch premise: the bad set is certified separately for each of the
+$2^3=8$ branch-sign combinations, namely the candidate's child branch and
+the $\pm$ branches of the two parents $P$ and $P'$, taking the worst case,
+as in the certifier of Appendix~\ref{app:cert}), the certified
+configuration satisfies
+\[
+  \relL\,\hat\nu(\mathrm{bad})\ \le\ \tfrac12\,\hat\nu(\mathrm{accepted})
+  \qquad\text{for all }\tau\ge0 .
+\]
+\end{lemma}
+
+\noindent\emph{Proof.}
+\emph{Deduction set.} A disclosure intersection with a past site at
+generation gap $j\ge1$ requires
+\[
+  D(v):=\tilde\Delta-v\,j\Tg\ \in\
+  \mathcal{K}(v):=B(0,2R)\oplus\mathrm{seg}\bigl((v-v_P)\Ta\bigr)
+  \oplus\mathrm{seg}\bigl(-(v-v_{P'})\Ta\bigr),
+\]
+where $\tilde\Delta$ is the rounded site offset; $D$ is affine in $v$ with
+Jacobian $(j\Tg)^3$, and drift is a translation, hence measure-invariant.
+Same-generation siblings ($j=0$) are $y$-separated by
+$8a\gg\mathrm{diam}\,\mathcal{K}$ and deterministically do not intersect.
+The seed's capsule is counted as an ordinary site.
+
+\emph{Box-hull Steiner upper bound.} $W:=(V\ominus P)\,\Ta$ is a box ($V$
+the velocity window box, $P$ the parent cover box, $\ominus$ the
+componentwise interval difference). For $x\in W$ the segment
+$\mathrm{seg}[0,x]$ lies in $\mathrm{conv}(\{0\}\cup W)$, which is
+contained in the component interval hull $H$ (convexity, one line);
+applying this to each of the two segment factors gives hulls $H_1,H_2$,
+whence
+\[
+  \bigcup_v\mathcal{K}(v)\ \subseteq\ B(0,2R)\oplus H_1\oplus(-H_2),
+\]
+a box (edge lengths $c_i$ = sums of the component edges) $\oplus$ ball of
+radius $r=2R$, whose volume is the exact Steiner closed form
+\[
+  \mathrm{vol}\ =\ \prod_i c_i\ +\ 2r\sum_{i<j}c_ic_j\ +\
+  \pi r^2\sum_i c_i\ +\ \tfrac{4\pi}{3}r^3
+\]
+(the middle term carries the twelve edges with exterior dihedral angle
+$\pi/2$), with $\mathrm{diam}\le4R+(\sum_ic_i^2)^{1/2}$. Ignoring the
+correlation of the common $v$ is the superset covering
+$\bigcup_v[A(v)\oplus B(v)]\subseteq(\bigcup_vA(v))\oplus(\bigcup_vB(v))$,
+hence conservative; the correctness of the box hull is the direct inclusion
+above (spot-reviewed).
+
+\emph{Site count.} An intersection at gap $j$ requires
+$\tilde\Delta\in j\Tg\cdot(\text{velocity window})\oplus\mathcal{K}$, a
+position window of diameter approximately
+$j\,a\sqrt3+\mathrm{diam}\,\mathcal{K}$; with $y$-track spacing $8a$, a
+single $z$-track, and the gap $j$ determining the generation (hence the
+$x$-multiplicity) uniquely, the multiplicity is in $y$ only:
+\[
+  n_j\ \le\ \frac{\sqrt3}{8}\,j+1+\frac{\mathrm{diam}\,\mathcal{K}}{8a},
+  \qquad
+  \sum_{j\ge1}\frac{n_j}{j^3}\ =\ \frac{\sqrt3}{8}\,\zeta(2)
+  +\Bigl(1+\frac{\mathrm{diam}\,\mathcal{K}}{8a}\Bigr)\zeta(3)\ \approx\
+  1.57 .
+\]
+
+\emph{The certified inequality.} Combining,
+\[
+  \hat\nu\Bigl(\bigcup\mathrm{bad}\Bigr)\ \le\ \relL\cdot
+  \frac{\mathrm{vol}(\mathcal{K})\,\sum_jn_j/j^3}{\Tg^3\,\mathrm{vol}(S)},
+  \qquad \mathrm{vol}(S)=\frac{28\pi}{3}\,w_1^3,
+\]
+with the shell endpoint $\wbar\in[w_1,2w_1]$ taken at its worst separately
+on each side (deduction numerator at $\wbar=2w_1$, geometric slack at
+$\wbar=w_1$). The certification gives
+$\relL\,\hat\nu(\mathrm{bad})\le\frac12\hat\nu(\mathrm{accepted})$ at
+$K_0=20$, $\Ta=\Ts/32$ for all $\tau$: at $\tau=0$ (the worst case) the
+bridge closes up to $\relL_{\max}=7.8$, about twice the assumed bound, and
+intermediate $\tau$ are covered by monotonicity --- the deduction is
+nonincreasing in $\tau$ ($\Tg^3$ grows, no other term increases) and the
+acceptance is nondecreasing (the slack grows). The certified values are in
+Appendix~\ref{app:certtable}; the spot review reproduced the bridge numbers
+independently from the skeleton
+($\mathrm{vol}(\mathcal{K})=66.5\,R^3$, $\sum_jn_j/j^3=1.569$, accepted
+mass $2.645\times10^{-8}$, $\relL_{\max}=7.79$;
+Appendix~\ref{app:method}). \qed
+
+\subsubsection{Lemma X: private-coin coupling}\label{app:c2X}
+
+\begin{lemma}[private-coin coupling (Lemma~X)]\label{lem:X}
+Let $\mathcal G$ be the construction's entire disclosure (capsule point
+process, pair coins, tracking judgments). For a pair-fresh candidate $j$
+with a successful arrival at time $\alpha$ in epoch $k$,
+\[
+  \PP\bigl(j\ \text{is marked and alive at }t_{k+1}\ \big|\
+  \mathcal G,\ \text{arrival}\bigr)\ \ge\ e^{-(t_{k+1}-\alpha)/\Ts}\ \ge\
+  \beta .
+\]
+\end{lemma}
+
+\noindent\emph{Proof} (three observations; review cycles 5--8).
+\emph{Observation 1 (failure requires a private coin).} Write $\bar Q_j$
+for the disqualification of $j$ at $t_{k+1}$. At arrival, $j$ is in one of
+three states, and in each of them $\bar Q_j$ implies the shortfall of a
+single private exponential coin of $j$: (i)~unmarked --- the arrival marks
+it, and disqualification requires the fresh lifetime $L_j<t_{k+1}-\alpha$;
+(ii)~marked and dead --- \emph{re-marking is allowed}, the arrival re-marks
+it, as in (i); (iii)~alive --- the arrival is a no-op but the qualification
+is already held, and disqualification requires the current residual
+$R_j<t_{k+1}-\alpha$. In all cases $\bar Q_j\subseteq A_j:=\{$the private
+coin of $j$ falls short of $t_{k+1}-\alpha\}$.
+\emph{Observation 2 (joint independence).} All conditioning up to time
+$\alpha$ reads lifetimes only through indicator paths
+$(\mathbf 1\{L>s\})_{s\le\alpha}$; the exponential law is memoryless under
+$\sigma(\min(L,s_0))$-type conditioning, so the fresh coins $\{L_j\}$ and
+the residuals $\{R_j\}$ remain jointly independent $\mathrm{Exp}(\Ts)$
+conditionally on $\mathcal G$, and
+$\PP(A_j\mid\mathcal G)\le1-e^{-(t_{k+1}-\alpha)/\Ts}$.
+\emph{Observation 3 (post-arrival interference is rescue-only).} Rogue
+activity after $\alpha$ produces only additional arrivals at $j$; an
+additional arrival is a no-op if $j$ is alive and a re-mark if $j$ is dead
+--- there is no path that creates a disqualification. Hence the inclusion
+of Observation 1 survives all later interference. \qed
+
+\begin{remark}
+No monotone comparison of whole processes (thinning, censored comparison)
+is used anywhere; the additivity of marks --- a mark never kills and never
+displaces --- is what makes failure one-directional. This is how the
+construction escapes the non-monotonicity trio recorded in
+Appendix~\ref{app:method}.
+\end{remark}
+
+\subsubsection{Same-branch flux}\label{app:c2flux}
+
+\emph{One-generation relay.} From the good parent $P^*$, the relay
+delivers to the target core the window entrants that are pair-fresh
+(Appendix~\ref{app:c2capsule}), have velocity in the accepted patch
+$\times\,I^*$ band (Lemma~\ref{lem:patch}), succeed their pair coin
+(probability $p$), and remain marked and alive from arrival (delay $\tau$)
+to $t_{k+1}$ (Lemma~\ref{lem:X}); landing in the core is then the content
+of the window definition (Appendix~\ref{app:c2lattice}).
+
+\emph{Flux lower bound, same-branch correction included.} Children of the
+opposite branch satisfy $|v-v_P|\ge0.4\,\wbar$. For children of the same
+branch, remove from the patch the ball of radius $\theta^*\wbar/2$ centred
+at $v_P$: at least a $1/4$ solid-angle fraction of the patch survives, and
+on it $|v-v_P|\ge\theta^*\wbar/2>0$. In both cases the coefficients are
+functions of the design constants at fixed $K_0$ only --- not of $m_1$ or
+$\rho$ (no circularity; cycle-11 audit). Hence the number of candidates
+stochastically dominates a Poisson variable of mean
+\[
+  \mu\ \ge\ c_4(\tau/\Ts)\,\frac{m_1}{32},
+\]
+where $c_4(\tau/\Ts)>0$ is a constant of the certified design (the $1/32$
+is $\Ta=\Ts/32$), and by Lemma~\ref{lem:bridge} the pair-fresh candidates
+surviving the deduction retain at least the mean $\mu/2$.
+
+\emph{Open bit.} The site is open when the tracked relay has delivered at
+least
+\[
+  N_h\ :=\ \lceil\beta\mu/16\rceil
+\]
+qualified particles (Appendix~\ref{app:c2lattice}); the tracking truncates
+observation at $M=\lceil2\mu\rceil$ candidates. By Lemma~\ref{lem:X} the
+failures satisfy $\sum_j\mathbf 1_{\bar Q_j}\le\sum_j\mathbf 1_{A_j}$, a
+sum stochastically dominated by independent $\mathrm{Bernoulli}(1-\beta)$
+variables; Chernoff bounds give
+\[
+  \PP(\text{site open}\mid\mathcal G)\ \ge\ 1-e^{-c\mu}\ =:\
+  1-\varepsilon(m_1)\ \longrightarrow\ 1 \qquad(m_1\to\infty)
+\]
+--- the generous slack of $N_h=\lceil\beta\mu/16\rceil$ against the
+surviving mean $\ge\beta\mu/2$ also absorbs the truncation overflow
+$\PP(\mathrm{Poisson}(\mu)>2\mu)\le e^{-c'\mu}$.
+
+\subsubsection{Assembly}\label{app:c2assembly}
+
+By Lemma~\ref{lem:X} and the flux bound,
+$\PP(\text{open}\mid\mathcal G)\ge1-\varepsilon(m_1)$ holds
+\emph{conditionally on the entire disclosure}; by the tower property the
+same lower bound holds sequentially in any breadth-first order of the
+sites, so the open bits stochastically dominate an i.i.d.\
+$\mathrm{Bernoulli}(1-\varepsilon)$ field on the oriented lattice (direct
+sequential conditioning; the domination theory of \cite{lss97} is not
+needed). Since $\varepsilon(m_1)\to0$, for $m_1>C_0$ we have
+$1-\varepsilon>3/4$.
+
+\paragraph{Identification of the comparison lattice.}
+The construction opens sites of the oriented graph
+$\mathcal{L}=\{(n,k)\in\mathbb{Z}\times\mathbb{Z}_{\ge0}:\ n+k\ \text{even}\}$
+with oriented edges $(n,k)\to(n\pm1,k+1)$; openness is a property of the
+site alone, and each site has exactly the two children $(n\pm1,k+1)$ and
+the two parents $(n\mp1,k-1)$. Liggett's bound \cite{liggett95} is proved
+for oriented site percolation on $\mathbb{Z}^2$: sites open independently
+with probability $\alpha$, percolation meaning an infinite oriented path
+from the origin moving in the positive $x$ and $y$ directions; his
+Theorem~1(b), applied with $q=p=\alpha$ through his exact identification of
+the growth chain with the diagonals $x+y=n$, gives percolation for every
+$\alpha\ge3/4$, i.e.\ $\alpha_c\le3/4$. The two graphs are identified by
+the bijection $\varphi(x,y):=(x-y,\,x+y)$, which maps $\mathbb{Z}^2_{\ge0}$
+onto the cone $\{(n,k)\in\mathcal{L}:|n|\le k\}$, carries the step
+$(x,y)\to(x+1,y)$ to $(n,k)\to(n+1,k+1)$, the step $(x,y)\to(x,y+1)$ to
+$(n,k)\to(n-1,k+1)$, and the origin to the seed site $(0,0)$. Every
+oriented path in $\mathcal{L}$ from $(0,0)$ stays in this cone ($|n|$
+changes by one per step while $k$ increases by one), so reachability from
+the seed site is decided inside the cone; $\varphi$ is an isomorphism of
+oriented graphs onto exactly this cone, and it carries i.i.d.\ Bernoulli
+site openness to i.i.d.\ Bernoulli site openness. Hence the bound
+transfers verbatim: site openness probability $>3/4$ implies an infinite
+open oriented cluster of the seed site with positive probability.
+
+Consequently, for $m_1>C_0$ the open bits percolate. Through the coverage
+clause each open site keeps a marked living particle at every time of its
+epoch, so along an infinite open path the marked living set is non-empty at
+\emph{every} time --- stronger than the definition of survival
+(non-emptiness at arbitrarily large times, Section~\ref{sec:intro}) --- and
+the full model survives. \emph{Ignition}: from the
+arbitrary-velocity seed, a bootstrap of a few generations assembles, with
+positive probability, the first $N_h$-herd in a first site; survival is a
+positive-probability statement, so this suffices.
+
+\emph{Uniformity of the constants.} No upper bound on $m_1$ is used
+anywhere: the coverage clause, the Chernoff step and the observation
+truncation $M=\lceil2\mu\rceil$ improve or are unaffected as $\mu$ grows;
+the cost terms are nonincreasing in $(\Kmix,\tau/\Ts)$ term by term. $C_0$
+is assembled explicitly from $\{c_4,\beta,\text{the bridge }1/2,\text{the
+Chernoff constant}\}$; its explicit quantification is deliberately left
+open (Section~\ref{sec:open}). Intermediate $\tau$ are covered by the
+monotonicity of both sides of the bridge (Lemma~\ref{lem:bridge}). \qed
+
+\smallskip
+\emph{Consequences.} With Theorem~A the existence of the critical surface
+(layer 1) is settled from both sides; the certified refutation of the
+SIR-type bound (Section~\ref{sec:afull}) sharpens the intermediate band,
+while the separation of the thresholds themselves remains open
+(Section~\ref{sec:open}). With Theorem~B and the scale family of
+Section~\ref{sec:thmD}, Theorem~C2 yields Theorem~D
+(Appendix~\ref{app:thmDapp}).
+
+%----------------------------------------------------------------------
+\subsection{Theorems C6a and C6b$'$: fronts}\label{app:frontsapp}
+
+Throughout, the front radius $R(t)$ is the supremum of $|x_j(t)|$ over the
+particles $j$ ever marked by time $t$ (dead marks included).
+
+\paragraph{Theorem C6a (superlinear front).}
+Assume $\Ts=\infty$, $p>0$, and that $\nu$ is isotropic with unbounded
+speed support. Fix $W>0$ with
+$\rho_W:=\rho\,\nu(\mathrm{shell}_W)>0$, where
+$\mathrm{shell}_W:=\{w:|w|\in[W,W+1]\}$; unbounded support supplies
+arbitrarily large such $W$. \emph{Condition on the seed's velocity} $v_0$
+--- unconditionally the counts below are mixed Poisson; conditioning
+removes the mixture. The seed is marked forever ($\Ts=\infty$), and
+class-$W$ particles enter its radius-$R$ capsule at rate
+\[
+  \lambda_W(v_0)\ =\ \rho_W\,\pi R^2\,\E_{w\sim\nu_W}|v_0-w| ,
+\]
+$\nu_W$ being the normalized restriction of $\nu$ to $\mathrm{shell}_W$.
+Positivity $\lambda_W(v_0)>0$ holds for $\nu$-a.e.\ $v_0$; this is the
+point where isotropy is consumed: a rotation-invariant law has no atoms
+away from the origin, so $\nu_W(\{v_0\})=0$ and
+$\E_{w\sim\nu_W}|v_0-w|>0$ (for atomic, non-isotropic $\nu$ this step can
+fail). \emph{Encounters are attempts}, on three grounds: the seed is
+immortal, so every contact window meets its alive interval and every entry
+triggers an attempt; motion is ballistic, so each ordered pair meets in a
+single contact interval and every entering pair is fresh, attempted once
+and only once; and each ordered pair carries an independent $p$-coin. The
+entries are the points of the phase-space Poisson process falling in the
+capsule swept along the seed's trajectory, so the number of
+\emph{successful} transmissions to class-$W$ particles by time $t$ is
+Poisson of mean $p\,\lambda_W(v_0)\,t\to\infty$: almost surely some
+class-$W$ particle $j$ is marked, at some finite time $t_W$. For
+$t\ge t_W$,
+\[
+  |x_j(t)|\ \ge\ |v_j|\,(t-t_W)-|x_j(t_W)|\ \ge\
+  W\,t-\bigl(W\,t_W+|x_j(t_W)|\bigr),
+\]
+and the deficit is a \emph{per-particle constant}: no uniformity over
+particles is needed. Since marks never die, $R(t)\ge|x_j(t)|$, so
+$\liminf_{t\to\infty}R(t)/t\ge W$ almost surely; intersecting over a
+countable sequence $W\uparrow\infty$ gives $R(t)/t\to\infty$ almost
+surely. \qed\ Whether the isotropy hypothesis can be removed is unknown.
+
+\paragraph{Theorem C6b$'$ (linear bound for bounded speeds).}
+Assume $|v|\le w_{\max}$ a.s.\ and $\tau>0$; let $x_0$ be the seed
+position. \emph{Well-foundedness.} Every mark event other than the seed
+has a unique parent mark event (a re-mark is an ordinary transmission,
+delay $\tau$ included), and its attempt time satisfies
+$a=\max(\alpha,m_{\mathrm{parent}})\ge m_{\mathrm{parent}}$, so marking
+times increase by at least $\tau$ along any ancestry:
+$m_{\mathrm{child}}=a+\tau\ge m_{\mathrm{parent}}+\tau$. This
+simultaneously proves that ancestries are \emph{well-founded} --- no
+cycles, no infinite descent --- which, and not locality per se, is the true
+role of $\tau>0$. A mark event at time $m_n\le t$ therefore terminates a
+finite ancestry $j_0=\mathrm{seed},j_1,\dots,j_n$ with attempt times
+$a_1<\dots<a_n\le t$ and $n\tau\le m_n\le t$, i.e.\
+$n\le\lfloor t/\tau\rfloor$. \emph{Telescoping travel accounting.} Each
+attempt happens inside the contact window, so parent and child are within
+distance $R$ at the attempt time:
+$|x_{j_i}(a_i)|\le|x_{j_{i-1}}(a_i)|+R$ for $1\le i\le n$; and between
+consecutive charging times each particle moves at most at speed
+$w_{\max}$:
+$|x_{j_{i-1}}(a_i)|\le|x_{j_{i-1}}(a_{i-1})|+w_{\max}(a_i-a_{i-1})$.
+Iterating down the ancestry from
+$|x_{j_n}(t)|\le|x_{j_n}(a_n)|+w_{\max}(t-a_n)$ to the seed
+($|x_{j_0}(a_1)|\le|x_0|+w_{\max}\,a_1$), the travel time telescopes
+exactly across the partition $[0,a_1]\cup[a_1,a_2]\cup\cdots\cup[a_n,t]$ of
+$[0,t]$ --- each particle of the ancestry is charged once, the child's
+travel between attempt and mark arrival included, with no double counting
+--- while each of the $n$ hops contributes a spatial jump at most $R$:
+\[
+  |x_{j_n}(t)|\ \le\ |x_0|+w_{\max}\,t+nR .
+\]
+Substituting $n\le\lfloor t/\tau\rfloor$ and taking the supremum over mark
+events with $m_n\le t$,
+\[
+  R(t)\ \le\ w_{\max}\,t+R\Bigl\lfloor\frac{t}{\tau}\Bigr\rfloor+|x_0| .
+\]
+The bound uses only the speed cap after marking, so it applies to
+dead-marked particles as well. As a byproduct, the front radius is finite
+--- deterministically so --- at every time. \qed
+
+\smallskip
+\emph{The $\tau=0$ pathology.} At $\tau=0$ the bound degenerates, and
+genuinely so: if the open cluster of the seed in the $p$-bond-diluted
+instantaneous geometric graph at time $0$ is infinite (for fixed $p>0$
+this has positive probability at $\rho R^3$ large, by standard
+renormalization), the whole cluster is marked at time $0^+$ and
+$R(0^+)=\infty$ can occur. $\tau>0$ is precisely what guarantees locality
+of the front in dense regimes --- physically, the probe travel time.
+
+%----------------------------------------------------------------------
+\subsection{Theorem D: motion beats static geometry}\label{app:thmDapp}
+
+Normalize $R=1$ (Section~\ref{sec:model}; all hypotheses below are stated
+in this normalization) and fix any $\rho$ with
+$0<\rho<\rho_c^{\mathrm{RGG}}(p{=}1)$. \emph{Static side.} By Theorem~B
+the survival event coincides with percolation of the seed's cluster in
+$G(\rho,1;p)$; the standard monotone coupling in $p$ and subcriticality at
+$p=1$ give almost-sure extinction for every $p\le1$, $\Ts$, $\tau$.
+\emph{Moving side.} Fix any $p>0$, $\tau\ge0$, $\Ts>0$ and a base law
+$\nu^0$ satisfying the hypotheses of Theorem~C2 (isotropy, shell mass
+$q>0$, $\relL\le4$), and let $\nu_s:=\nu^0(\cdot/s)$ be its pushforward
+under $w\mapsto sw$.
+
+\begin{lemma}[scale invariance]\label{lem:scale}
+$\nu_s$ has shell $S_s=sS^0$ and shell mass $q_s=\nu^0(S^0)=q$
+(invariant); its density bound scales as $s^{-3}$ and the shell volume as
+$s^3$, so the relative density ratio $\relL_s=\relL^0$ is invariant. Both
+$q$ and $\relL$ are uniform in $w_1$; $\tau/\Ts$ is untouched, so
+$C_0(\tau/\Ts)$ is fixed, while $\Kmix=s\,w_1^0\Ts$ and
+$m_1=p\rho q\pi\,s\,w_1^0\Ts$ grow linearly in $s$.
+\end{lemma}
+
+\noindent\emph{Proof.} The pushforward under $w\mapsto sw$ scales lengths
+by $s$, hence $S_s=sS^0$ and $\mathrm{vol}(S_s)=s^3\mathrm{vol}(S^0)$;
+masses are preserved, so $q_s=q$ and
+$\sup\dd\nu_s/\dd\mathrm{Leb}=s^{-3}\sup\dd\nu^0/\dd\mathrm{Leb}$; the
+ratio $\relL=(\text{density bound})/(q/\mathrm{vol}(S))$ is therefore
+invariant. The remaining statements are read off the definitions of
+$\Kmix$ and $m_1$. \qed
+
+\smallskip
+For $s$ large enough, $\Kmix\ge20$ and $m_1>C_0(\tau/\Ts)$, so by
+Theorem~C2 the full model survives with positive probability. Under the
+entry-driven convention, sufficiently fast motion enables colonization at
+densities where static geometry forbids it for every $p$. \qed
+
+\bibliographystyle{plain}
+\bibliography{refs}
+
+\end{document}

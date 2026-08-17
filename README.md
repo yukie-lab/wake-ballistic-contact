@@ -51,9 +51,14 @@ verification record is `docs/phase5/exit-audit-report.md`.
 
 ## Companion mathematics paper
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21955412.svg)](https://doi.org/10.5281/zenodo.21955412)
+
 The survival/extinction theory imported by the theorem layer is proved in
 *Contact processes on ballistic Poisson particles*
-([DOI 10.5281/zenodo.21955413](https://doi.org/10.5281/zenodo.21955413),
+(concept [DOI 10.5281/zenodo.21955412](https://doi.org/10.5281/zenodo.21955412),
+resolving to the latest version — current: v2, arXiv-ready with
+self-contained appendices, [10.5281/zenodo.21979354](https://doi.org/10.5281/zenodo.21979354);
+v1: [10.5281/zenodo.21955413](https://doi.org/10.5281/zenodo.21955413);
 repository: [wake-ballistic-contact](https://github.com/yukie-lab/wake-ballistic-contact)).
 
 ## License
