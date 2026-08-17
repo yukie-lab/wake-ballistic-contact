@@ -42,7 +42,9 @@
   [PASS] 生存定義: at arbitrarily large times(§1)
   [PASS] 旧定義の残存なし(non-empty for all times)
   [PASS] C.3 注記: 被覆条項による全時刻非空は定義より強い
+  [PASS] 裁定#22-(6): eight-branch premise の展開(2^3=8 枝符号)
+  [PASS] 裁定#22-(6): 展開文に em-dash なし(F4)
 ## ゲート5: コンパイル成果物
-  [PASS] paper.pdf が paper.tex より新しい — 359603 bytes
+  [PASS] paper.pdf が paper.tex より新しい — 359917 bytes
 
 結果: 全ゲート PASS

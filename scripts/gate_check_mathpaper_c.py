@@ -106,6 +106,10 @@ check(6, "旧定義の残存なし(non-empty for all times)",
       "non-empty for all times" not in src)
 check(6, "C.3 注記: 被覆条項による全時刻非空は定義より強い",
       "stronger than the definition of survival" in appc)
+check(6, "裁定#22-(6): eight-branch premise の展開(2^3=8 枝符号)",
+      "$2^3=8$ branch-sign combinations" in appc)
+check(6, "裁定#22-(6): 展開文に em-dash なし(F4)",
+      "premise: the bad set is certified" in appc.replace("\n", " "))
 
 print("## ゲート5: コンパイル成果物")
 pdf = TEX.parent / "paper.pdf"
