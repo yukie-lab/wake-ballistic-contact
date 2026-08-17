@@ -1,0 +1,38 @@
+## ゲート1: G1 — 付録C内リポジトリ参照プレースホルダ
+  [PASS] 'bundled repository' 付録C内 0件 — 0 件
+  [PASS] 'wake-repo-v1.tar.gz' 付録C内 0件 — 0 件
+  [PASS] 'c2-proof-final.md' 付録C内 0件 — 0 件
+  [PASS] 'claims.md' 付録C内 0件 — 0 件
+## ゲート2: フォーク6改称+脚注(裁定 2026-08-18)
+  [PASS] namedprop 'Proposition' 残存ゼロ
+  [PASS] §1 Claim 改称(numerically certified, experiment E8c)
+  [PASS] §4 Claim 改称(reverse channel)
+  [PASS] 強度記述不変: certified violation of the expectation bound
+  [PASS] 強度記述不変: does not by itself prove survival
+  [PASS] C系列番号脚注(Theorem labels retain ...)
+## ゲート3: G2 — 定数追跡(付録C転写)
+  [PASS] T_a = T_s/32
+  [PASS] T_g = 64(τ+T_s)
+  [PASS] 200 分割
+  [PASS] ū_x = w̄/√(17/16)
+  [PASS] a = ū_x T_g/32
+  [PASS] ℓ_y = 8a
+  [PASS] θ* = s*/(1.05w̄)
+  [PASS] N_h = ⌈βμ/16⌉
+  [PASS] M = ⌈2μ⌉
+## ゲート4: G3 — 認証数値の照合
+  [PASS] 付録A表: 7.82
+  [PASS] 付録A表: 0.00483
+  [PASS] 付録A表: 1.688\times10^{-9}
+  [PASS] 付録A表: 2.640\times10^{-8}
+  [PASS] C.3 幾何契約: s^*=0.0048
+  [PASS] C.3 橋: \relL_{\max}=7.8
+  [PASS] C.3 スポット再現: 66.5
+  [PASS] C.3 スポット再現: 1.569
+  [PASS] C.3 スポット再現: 2.645\times10^{-8}
+  [PASS] C.3 スポット再現: 7.79
+  [PASS] 表ラベル参照: app:certtable
+## ゲート5: コンパイル成果物
+  [PASS] paper.pdf が paper.tex より新しい — 359359 bytes
+
+結果: 全ゲート PASS
