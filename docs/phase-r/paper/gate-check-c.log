@@ -10,6 +10,7 @@
   [PASS] 強度記述不変: certified violation of the expectation bound
   [PASS] 強度記述不変: does not by itself prove survival
   [PASS] C系列番号脚注(Theorem labels retain ...)
+  [PASS] 裁定#22-(2): 打切超過の Chernoff 余裕吸収の明示
 ## ゲート3: G2 — 定数追跡(付録C転写)
   [PASS] T_a = T_s/32
   [PASS] T_g = 64(τ+T_s)
@@ -32,7 +33,16 @@
   [PASS] C.3 スポット再現: 2.645\times10^{-8}
   [PASS] C.3 スポット再現: 7.79
   [PASS] 表ラベル参照: app:certtable
+## ゲート6: 裁定#22 — C6a 等方性の全所在一致+生存定義
+  [PASS] §1 定理文: isotropic with unbounded support
+  [PASS] §8 言及: isotropic unbounded ν
+  [PASS] C.4 定理文再掲: isotropic with unbounded speed support
+  [PASS] 非等方の残存文言なし(unbounded support 単独の定理文)
+  [PASS] 任意注記: 等方性除去の可否は不明
+  [PASS] 生存定義: at arbitrarily large times(§1)
+  [PASS] 旧定義の残存なし(non-empty for all times)
+  [PASS] C.3 注記: 被覆条項による全時刻非空は定義より強い
 ## ゲート5: コンパイル成果物
-  [PASS] paper.pdf が paper.tex より新しい — 359359 bytes
+  [PASS] paper.pdf が paper.tex より新しい — 359603 bytes
 
 結果: 全ゲート PASS

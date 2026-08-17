@@ -52,6 +52,9 @@ check(2, "強度記述不変: does not by itself prove survival",
       "does not by itself prove survival" in src)
 check(2, "C系列番号脚注(Theorem labels retain ...)",
       "Theorem labels retain" in src and "Gaps in the numbering are deliberate" in src)
+check(2, "裁定#22-(2): 打切超過の Chernoff 余裕吸収の明示",
+      "also absorbs the\ntruncation overflow" in appc
+      or "also absorbs the truncation overflow" in appc)
 
 print("## ゲート3: G2 — 定数追跡(付録C転写)")
 constants = [
@@ -83,6 +86,26 @@ for val, where, blob in [
     ("app:certtable", "表ラベル参照", appc),
 ]:
     check(4, f"{where}: {val}", val in blob)
+
+print("## ゲート6: 裁定#22 — C6a 等方性の全所在一致+生存定義")
+check(6, "§1 定理文: isotropic with unbounded support",
+      "$\\nu$ is isotropic with unbounded support" in src)
+check(6, "§8 言及: isotropic unbounded ν",
+      "and isotropic unbounded $\\nu$" in src)
+check(6, "C.4 定理文再掲: isotropic with unbounded speed support",
+      "is isotropic with unbounded\nspeed support" in appc
+      or "is isotropic with unbounded speed support" in appc)
+check(6, "非等方の残存文言なし(unbounded support 単独の定理文)",
+      "and $\\nu$ has unbounded support" not in src)
+check(6, "任意注記: 等方性除去の可否は不明",
+      "Whether the isotropy hypothesis can be removed is unknown" in appc)
+check(6, "生存定義: at arbitrarily large times(§1)",
+      "non-empty at arbitrarily large\ntimes" in src
+      or "non-empty at arbitrarily large times" in src)
+check(6, "旧定義の残存なし(non-empty for all times)",
+      "non-empty for all times" not in src)
+check(6, "C.3 注記: 被覆条項による全時刻非空は定義より強い",
+      "stronger than the definition of survival" in appc)
 
 print("## ゲート5: コンパイル成果物")
 pdf = TEX.parent / "paper.pdf"

@@ -144,7 +144,8 @@ pair), succeeding with probability $p$; on success $j$ becomes marked at
 time $a_{ij}+\tau$. Mark lifetimes are $\mathrm{Exp}(\Ts)$; a particle whose
 mark has died may be marked again by a fresh pair (\emph{re-marking}).
 The seed is one marked particle near the origin at $t=0$. \emph{Survival}
-means the set of living marked particles is non-empty for all times.
+means the set of living marked particles is non-empty at arbitrarily large
+times.
 
 Two dimensionless quantities organize the phase diagram: with
 $\lambda:=\rho\pi R^2\,\E|v-v'|$ (entry rate; $v,v'\sim\nu$ independent) and
@@ -221,8 +222,8 @@ at densities where static geometry forbids it}.
 \end{namedthm}
 
 \begin{namedthm}{Theorem C6a (superlinear front)}
-If $\Ts=\infty$ and $\nu$ has unbounded support, then the front radius
-satisfies $R(t)/t\to\infty$ almost surely.
+If $\Ts=\infty$ and $\nu$ is isotropic with unbounded support, then the
+front radius satisfies $R(t)/t\to\infty$ almost surely.
 \end{namedthm}
 
 \begin{namedthm}{Theorem C6b$'$ (linear bound for bounded speeds)}
@@ -481,7 +482,7 @@ survives with positive probability. \qed
 
 \subsection{Superlinear and linear fronts}
 Theorem~C6a (Appendix~C.4) shows $R(t)/t\to\infty$ a.s.\ for $\Ts=\infty$
-and unbounded $\nu$: the seed alone recruits carriers of ever-larger speeds,
+and isotropic unbounded $\nu$: the seed alone recruits carriers of ever-larger speeds,
 an infinite-system version of the fastest-of-$N$ heuristic used in
 \cite{cn19}. Conversely, Theorem~C6b$'$: for $|v|\le w_{\max}$ and $\tau>0$,
 \[
@@ -905,7 +906,7 @@ many mark events, each of finite lifetime, and the living marked set is
 eventually empty forever. If the cluster is infinite, marks are created at
 every epoch $k\tau$ (at time $0^+$ if $\tau=0$), and each freshly marked
 particle is alive at its marking instant, so living marked particles exist
-at unbounded times, and lifetimes only govern how long the predetermined
+at arbitrarily large times, and lifetimes only govern how long the predetermined
 cluster stays lit. Hence the survival event coincides, up to null sets,
 with the percolation event $\{$the seed's cluster in $G(\rho,R;p)$ is
 infinite$\}$, for every $\Ts$ and $\tau$. \qed
@@ -1293,7 +1294,9 @@ open oriented cluster of the seed site with positive probability.
 Consequently, for $m_1>C_0$ the open bits percolate. Through the coverage
 clause each open site keeps a marked living particle at every time of its
 epoch, so along an infinite open path the marked living set is non-empty at
-every time: the full model survives. \emph{Ignition}: from the
+\emph{every} time --- stronger than the definition of survival
+(non-emptiness at arbitrarily large times, Section~\ref{sec:intro}) --- and
+the full model survives. \emph{Ignition}: from the
 arbitrary-velocity seed, a bootstrap of a few generations assembles, with
 positive probability, the first $N_h$-herd in a first site; survival is a
 positive-probability statement, so this suffices.
@@ -1323,8 +1326,8 @@ Throughout, the front radius $R(t)$ is the supremum of $|x_j(t)|$ over the
 particles $j$ ever marked by time $t$ (dead marks included).
 
 \paragraph{Theorem C6a (superlinear front).}
-Assume $\Ts=\infty$, $p>0$, and that the speed law of $\nu$ has unbounded
-support. Fix $W>0$ with
+Assume $\Ts=\infty$, $p>0$, and that $\nu$ is isotropic with unbounded
+speed support. Fix $W>0$ with
 $\rho_W:=\rho\,\nu(\mathrm{shell}_W)>0$, where
 $\mathrm{shell}_W:=\{w:|w|\in[W,W+1]\}$; unbounded support supplies
 arbitrarily large such $W$. \emph{Condition on the seed's velocity} $v_0$
@@ -1358,7 +1361,7 @@ and the deficit is a \emph{per-particle constant}: no uniformity over
 particles is needed. Since marks never die, $R(t)\ge|x_j(t)|$, so
 $\liminf_{t\to\infty}R(t)/t\ge W$ almost surely; intersecting over a
 countable sequence $W\uparrow\infty$ gives $R(t)/t\to\infty$ almost
-surely. \qed
+surely. \qed\ Whether the isotropy hypothesis can be removed is unknown.
 
 \paragraph{Theorem C6b$'$ (linear bound for bounded speeds).}
 Assume $|v|\le w_{\max}$ a.s.\ and $\tau>0$; let $x_0$ be the seed
